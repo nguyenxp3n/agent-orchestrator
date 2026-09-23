@@ -1,20 +1,21 @@
-# Final Project Gate Checklist
+# Checklist: Final Project Gate
 
-Execute this checklist before declaring project-level completion.
+Do not use `FINAL`, `100% COMPLETE`, or `PRODUCTION READY` unless the assurance level supports that label.
 
-## 1. Package integration completeness
-- [ ] Every Work Package in the DAG has reached `INTEGRATED` status.
-- [ ] Zero unmerged feature branches remain in the repository.
-- [ ] Integration queue is empty.
+```text
+[ ] Every required WP has terminal accepted/integrated disposition
+[ ] No unresolved Critical/High blocker
+[ ] Ownership/resource registry has no unresolved collision
+[ ] All accepted candidate identities trace to integration history
+[ ] Global QA passes on final integrated SHA
+[ ] Contract/schema/migration checks pass
+[ ] Critical end-to-end journeys pass when required
+[ ] Cloud CI/CD verified when part of release definition
+[ ] Security/release gates complete
+[ ] Waivers explicit and approved
+[ ] Known limitations/residual risks documented
+[ ] Git working state clean for release artifact
+[ ] Release artifact/checksum integrity verified
+```
 
-## 2. Global verification
-- [ ] Full repository test suite passes cleanly on the integrated main branch.
-- [ ] End-to-end user journeys pass in a unified test environment.
-- [ ] Automated cloud CI/CD pipelines report successful completion on the main commit SHA.
-- [ ] Database migration downgrade and upgrade cycles execute without errors.
-
-## 3. Documentation and release artifacts
-- [ ] Architectural documentation reflects the final merged implementation.
-- [ ] API specifications and client contracts match deployed endpoints.
-- [ ] Residual risks, known limitations, and deployment environment requirements are explicitly documented.
-- [ ] Final assurance level is declared based on verified evidence (`RELEASE_VERIFIED` or `LOCALLY_VERIFIED`).
+Assurance labels should describe actual evidence: `IMPLEMENTED`, `LOCALLY_VERIFIED`, `ACCEPTED`, `INTEGRATED`, `RELEASE_VERIFIED`.

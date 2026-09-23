@@ -1,27 +1,27 @@
-# Scenario: Git Merge Conflict During Integration
+# Scenario: Integration Hotspot Conflict
 
 ## Trigger
-Git reports merge conflicts when integrating an accepted candidate into main.
+Accepted branches conflict at router/bootstrap/root config.
 
 ## Risk
-Corrupting codebase logic through incorrect conflict resolution.
+The Integrator may accidentally choose incorrect semantics.
 
 ## Evidence
-Git merge conflict markers and failure logs during sequential integration.
+Integration Requests; frozen contracts; diff from each candidate.
 
 ## Immediate Action
-Halt integration. Compare conflicting hunks against frozen specifications.
+Resolve only when semantics authoritative; otherwise DR.
 
 ## Forbidden Response
-Never accept code hunks blindly based on which branch was committed more recently.
+Do not choose ours/theirs merely to make the code compile.
 
 ## Recovery Procedure
-The Integrator resolves textual overlaps matching frozen contracts. If semantic contradictions exist, submit a Decision Request.
+Apply approved hotspot changes, run global gate.
 
 ## Exit Criteria
-Merged main branch passes global quality gates and cross-package test suites.
+Integrated result matches contracts and tests pass.
 
 ## Example Lead Response
 ```text
-Merge conflict in router.go. Semantics governed by WP-100 contract. Integrator resolves conflict and executes full QA gate.
+Two modules require route registration; Integrator combines the registrations according to the contract.
 ```

@@ -1,14 +1,18 @@
-# Playbook: Cloud CI/CD Failure
+# Playbook: CI Failure
 
 ## Trigger
-Local quality gates pass, but cloud CI pipeline fails on the candidate branch or main branch.
+Cloud CI fails, or local passes while cloud fails.
 
-## Procedure
-1. **Inspect pipeline logs directly**: Use platform CLI tools (`gh run view <id> --log-failed`) to inspect failing jobs.
-2. **Isolate failure category**:
-   - Environment / Runner: Missing secrets, outdated OS images, or runner cache drift.
-   - Filesystem: Case-sensitivity differences between local OS and Linux runners.
-   - Timing: Race conditions or service container readiness timeouts.
-   - True candidate defect: Missed dependency or uncommitted test file.
-3. **Reproduce locally**: Run the failing step with identical environment variables and clean cache.
-4. **Fix policy**: If the failure is caused by CI infrastructure, address the configuration file. Never modify application logic to mask infrastructure failures.
+## Triage
+Compare commit SHA, tool/runtime versions, environment variables/secrets, service readiness, cache, OS/filesystem, and rate limits. Classify as candidate bug / CI config / environment / external outage.
+
+```bash
+gh run list --branch <branch> --limit 10
+gh run view <run-id>
+```
+
+## Forbidden Response
+Do not label a failure flaky merely because a rerun passes; do not modify application code before identifying the failing layer.
+
+## Exit Criteria
+Root cause or bounded classification has evidence; the required job is green on the correct SHA or release status remains blocked.

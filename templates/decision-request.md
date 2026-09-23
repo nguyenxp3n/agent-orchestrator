@@ -1,36 +1,57 @@
 # Template: Decision Request
 
+## Identity
+
 ```text
-DR_ID: DR-<number>
-DATE: <timestamp>
-AUTHOR_ROLE: <Lead | Worker | Auditor | Integrator>
-AFFECTED_WPS: [<WP_ID>]
+DR_ID:
+WP_ID:
+Agent/generation:
+Status: OPEN
+Decision owner:
+```
 
-CONFLICT_OR_DECISION_DESCRIPTION:
-<Clear statement of the ambiguity, specification conflict, or scope expansion request>
+## Question
 
-SUPPORTING_EVIDENCE:
-- Source A: <file path, line reference, or commit>
-- Source B: <competing file path or specification excerpt>
+One clear decision question.
 
-IMPACT_ANALYSIS:
-- Architecture / contracts:
-- Ownership / resources:
-- Security / secrets:
-- Concurrency / DAG schedule:
+## Evidence / Facts
 
-TECHNICAL_OPTIONS:
-1. Option A: <description, advantages, risks>
-2. Option B: <description, advantages, risks>
+- Evidence path/command:
+- Fact:
+- Unknown:
+- Contradiction:
 
-RECOMMENDED_ACTION:
-<Preferred option with explicit rationale>
+## Why Work Cannot Safely Continue
 
-FINAL_RULING:
-<Documented decision approved by human authority or Lead Arbitrator>
+State the impact of guessing: security, contract, scope, resource, data, or integration.
 
-REQUIRED_ACTIONS:
-- Contracts updated:
-- Work Packages recompiled:
-- Downstream audits invalidated:
+## Options
+
+### Option A
+- Change:
+- Benefits:
+- Risks/blast radius:
+- Ownership/resource impact:
+- Verification required:
+
+### Option B
+- Change:
+- Benefits:
+- Risks/blast radius:
+- Ownership/resource impact:
+- Verification required:
+
+## Worker Recommendation
+
+A recommendation is allowed, but it is not authority.
+
+## Lead Disposition
+
+```text
+APPROVE_OPTION | REJECT | REQUEST_MORE_EVIDENCE | ESCALATE_HUMAN
+Decision:
+Exact scope/resource grant:
+Invariants:
+Required verification:
+Downstream/context refresh impact:
 ```

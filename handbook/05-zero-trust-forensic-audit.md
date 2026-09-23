@@ -1,10 +1,10 @@
-# Chapter 5: Zero-Trust Forensic Audit Protocol
+# Chapter 5: Zero-Trust Forensic Audit
 
 ## 5.1 Objective
 
-An audit answers one question: **Does the candidate commit satisfy the Work Package contract?** It ignores conversational claims and unverified assertions. Audits bind strictly to exact base and candidate commit SHAs, relying solely on freshly captured evidence.
+An audit answers one question: **does the current candidate actually satisfy the Work Package contract?** It does not ask whether the worker is confident or whether the worker's tests “seem” to pass. Audit must bind to the exact base/head identity and use fresh evidence.
 
-## 5.2 Step 1: Git identity and commit inspection
+## 5.2 Step 1: Git identity and commit
 
 ```bash
 git branch --show-current
@@ -12,7 +12,7 @@ git rev-parse HEAD
 git log -1 --stat --oneline
 ```
 
-Record the active branch name, candidate commit SHA, and base commit SHA. Verify commit messages against project conventions. If the commit SHA differs from the worker completion report, the report is stale; audit the actual candidate commit or halt for clarification.
+Record branch, HEAD SHA, and base SHA. Check the commit message against project convention when one exists. If the candidate SHA differs from the SHA reported by the worker, the worker report is stale; audit the actual candidate or request clarification.
 
 ## 5.3 Step 2: Workspace hygiene
 
@@ -21,9 +21,9 @@ git status --short
 git ls-files --others --exclude-standard
 ```
 
-Check for untracked files, stray build artifacts, lingering credentials, and uncommitted edits. A dirty working tree invalidates clean builds. Uncommitted changes must be resolved before proceeding.
+Check untracked files, generated junk, local credentials, and dirty changes after commit. A dirty working tree is not always an automatic failure, but it must be explained and bound to the correct candidate; for a release candidate, fail closed in most cases.
 
-## 5.4 Step 3: Diff boundary and destructive change inspection
+## 5.4 Step 3: Diff boundary and destructive changes
 
 ```bash
 git diff <base>...HEAD --name-status
@@ -31,82 +31,84 @@ git diff <base>...HEAD --stat
 git diff <base>...HEAD
 ```
 
-Verify every modified path against `allowed_paths`, `readonly_paths`, and `forbidden_paths`. Inspect renamed and deleted files individually. Verify semantic resources: database migration sequence numbers, API routes, database tables, environment variable names, network ports, and event topics.
+Compare every path against `allowed_paths`, `readonly_paths`, and `forbidden_paths`. Check renames/deletes separately. Then inspect semantic resources: migration number, route, table, env var, port, event name.
 
-Any modification outside assigned paths constitutes a `SCOPE_VIOLATION`. Unapproved modifications must not be accepted simply because the code appears functional.
+An out-of-scope write is a `SCOPE_VIOLATION`; do not waive it because the code is “useful.”
 
-## 5.5 Step 4: Independent targeted test execution
+## 5.5 Step 4: Independent unit/target tests
 
-Execute project test commands directly rather than relying on cached outputs:
+Use commands from the Project Execution Profile. Do not guess. Examples:
 
 ```bash
-# Example targeted test commands discovered during intake
+<project-specific targeted test command discovered during intake>
 pnpm test -- review
 pytest -q tests/review
 cargo test review
 ```
 
-Disable test caches when supported by the toolchain to avoid false positives. Record the exact command string, exit code, test counts, and failure traces.
+Prefer disabling cache when the framework/toolchain supports it to avoid stale evidence. Record command, exit code, test count, and failure summary.
 
-## 5.6 Step 5: Full repository quality gate
+## 5.6 Step 5: Repo-wide quality gate
 
-Run canonical repository verification:
+Run the project's canonical gate:
 
 ```bash
 task qa
-# Or project equivalents: make test / pnpm check / cargo test / go test ./... / pytest
+# hoặc make test / pnpm check / cargo test / go test ./... / pytest / dotnet test
 ```
 
-Commands in this documentation are illustrative. The Auditor must execute the **canonical quality gate defined by the project**. Distinguish pre-existing baseline failures from regressions introduced by the candidate commit. Never penalize a worker for historical failures, but never conceal failing tests.
+Commands in this documentation are examples only. The Auditor must run the **quality gate the project treats as canonical**, while separating pre-existing baseline failures from candidate regressions. Do not attribute old failures to the worker, and do not hide any failure.
 
-## 5.7 Step 6: Deliverable checklist and expected outputs
+## 5.7 Step 6: Rubric / Expected Outputs
 
-Passing unit tests do not prove feature completeness. Compare files on disk against the contractual deliverables:
+This layer cannot usually be replaced by green tests. Count expected files/artifacts against the contract.
+
+Project-neutral example:
 
 ```text
 Required: <domain-implementation-artifacts>
 Required: <client/consumer/integration-artifacts>
-Actual: Domain files exist, consumer integration files missing
+Actual: first group exists, second required group missing
 Disposition: REWORK
 ```
 
-Verify migration up and down scripts, API wrappers, component exports, documentation updates, generated artifacts, and test fixtures specified in the Work Package.
+Check migration up/down, API wrapper, component/styles/barrel export, docs, generated artifact, fixtures, and other WP-specific outputs.
 
-## 5.8 Step 7: Contracts, security, regression, and audit reporting
+## 5.8 Step 7: Contracts, security, regression, and audit report
 
-Verify frozen API schemas, event contracts, database schemas, security invariants, credential handling, transaction semantics, and downstream consumer dependencies.
+Check frozen API/event/schema contracts; security invariants; secret handling; idempotency/transactions when required by the WP; regression risk; downstream consumers.
 
-The final Audit Report must record:
+The Audit Report must include:
 
 ```text
 WP ID
-Worker identifier and assignment generation
-Branch name and worktree path
-Base commit SHA and Candidate commit SHA
-List of changed files
-Executed test commands and process exit codes
-Acceptance criteria mapping to verified evidence
-Audit findings categorized by severity
+Agent / generation
+Branch / worktree
+Base SHA / Candidate SHA
+Changed files
+Commands + exit codes
+Acceptance criterion -> evidence mapping
+Findings with severity
 Disposition: ACCEPT | REJECT/REWORK | ESCALATE
-Residual risks and documented unknowns
+Residual risks / unknowns
 ```
 
-## 5.9 Missing evidence is recorded as UNKNOWN
+## 5.9 Missing evidence = UNKNOWN
 
-Never infer passing status from the absence of logged errors. If cloud CI is inaccessible, report:
+Do not infer PASS from “no issue found.” If cloud CI is inaccessible, record:
 
 ```text
 Cloud CI: UNKNOWN
-Reason: Network credentials unavailable in local test harness
-Local gate: PASS, exit code 0
-Effect: Cloud-level release assurance unestablished
+Reason: credential/network unavailable
+Local gate: PASS, exit 0
+Effect: release/cloud assurance not established
 ```
 
-Depending on the package contract, an `UNKNOWN` status either blocks local acceptance or limits the final assurance level to `LOCALLY_VERIFIED`.
+Depending on the WP, an unknown may block `ACCEPTED` or only block `RELEASE_VERIFIED`.
 
 ## 5.10 Immutable audit identity
 
-Acceptance binds strictly to an exact candidate commit SHA. If a worker pushes subsequent changes after an audit, even for minor documentation edits, earlier approval does not transfer to the new commit.
+Acceptance must bind to the exact candidate SHA/snapshot. After audit, if the worker adds a commit even if it “only changes README,” the old audit does not automatically apply to the new SHA.
 
 ```bash
 expected=<audited-sha>
@@ -114,32 +116,33 @@ actual=$(git rev-parse HEAD)
 test "$expected" = "$actual"
 ```
 
-A differing commit SHA indicates a `STALE_AUDIT_SHA`, requiring a fresh audit.
+Different SHA → `STALE_AUDIT_SHA`; re-audit at the appropriate scope.
 
-## 5.11 Writing actionable REWORK reports
+## 5.11 Effective REWORK reports
 
-Never issue vague rejections. Specify:
-- Exactly which acceptance criteria failed
-- Verifiable command outputs demonstrating the failure
-- Specific files or paths that violate boundaries
-- Permitted directories where fixes may be applied
-- Required test commands that must exit with code 0
-- Passing components that do not require re-implementation
+Do not say “not good enough.” State exactly:
 
-## 5.12 Audits verify; they do not rewrite
+- which criterion failed;
+- which evidence proves the failure;
+- which file/path is missing or violates scope;
+- where the worker is allowed to make corrections;
+- which command must be rerun;
+- which passing work does not need to be repeated when candidate identity/recovery rules permit.
 
-The Auditor does not modify source code and approve its own changes. When defects are discovered, the Auditor issues a rework directive to the worker. For small integration patches applied by the Integrator, the Auditor conducts a distinct audit on the resulting integration candidate.
+## 5.12 Audit is not rewrite
 
-## 5.13 Summary checklist
+The Auditor does not modify code in the same task and then sign its own acceptance. When a defect is found, the Auditor creates corrective work for the Worker. For an integration-only fix applied by the Integrator, the Auditor must audit the new candidate or apply the defined integration gate.
+
+## 5.13 Seven-Step Checklist summary
 
 ```text
-1. Git identity and candidate commit verification
-2. Working tree status and untracked file hygiene
-3. Detailed diff inspection against assigned boundaries
-4. Independent execution of targeted unit tests
-5. Execution of canonical repository quality gates
-6. 100% verification of expected deliverable files
-7. Contract, security, and regression checks with signed disposition
+1. Git identity/commit
+2. git status + untracked hygiene
+3. git diff + scope/resource boundaries
+4. independent unit/target tests
+5. repository quality gate
+6. 100% barem/expected outputs
+7. contracts/security/regression + signed disposition
 ```
 
-Use the operational checklist at `checklists/seven-step-forensic-audit.md`.
+The operational checklist is in `checklists/seven-step-forensic-audit.md`.

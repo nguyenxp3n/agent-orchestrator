@@ -1,26 +1,31 @@
-# Pre-Dispatch Checklist
+# Checklist: Pre-Dispatch + Prompt Quality Gate
 
-Complete this checklist before dispatching any Work Package to an active coding worker.
+```text
+[ ] WP objective measurable
+[ ] success predicate observable
+[ ] Source requirements/authority known
+[ ] Relevant context references selected; no unnecessary context dump
+[ ] Context trust classes identified where external/generated input exists
+[ ] Hard dependencies satisfied
+[ ] Required contract frozen
+[ ] allowed_paths / owned domains exact
+[ ] readonly_paths exact
+[ ] forbidden/integration-only areas exact
+[ ] Semantic resources allocated or explicitly not applicable
+[ ] Migration/version/port allocation recorded when applicable
+[ ] Expected outputs cover every required layer
+[ ] Material non-counting outcomes/near misses identified
+[ ] Verification commands/checks discovered from project truth
+[ ] Evidence identity defined: workspace/branch/base/candidate/generation as applicable
+[ ] Isolated workspace actually exists when parallel writers require it
+[ ] Stop/Decision/Resource/Integration Request conditions included
+[ ] Worker output contract included
+[ ] Prompt mode chosen: Compact / Standard / Long-Horizon
+[ ] Long-Horizon persistence, if any, has matching verification/return gate
+[ ] Canonical prompt does not depend unnecessarily on vendor-specific tool names
+[ ] Red-team check performed for expensive/high-risk dispatch
+[ ] Prompt Quality Gate disposition = READY
+[ ] No unresolved Critical protected ambiguity
+```
 
-## 1. Prerequisites and dependencies
-- [ ] Upstream hard dependencies in the DAG are merged or frozen.
-- [ ] Required interface contracts (OpenAPI, Protobuf, shared types) are frozen in `readonly_paths`.
-- [ ] Project Execution Profile has verified that all required build and test tools exist in the environment.
-
-## 2. Boundary and resource isolation
-- [ ] An isolated workspace (Git worktree, clone, or container) is provisioned.
-- [ ] Base commit SHA is verified and recorded.
-- [ ] `allowed_paths` strictly covers the assigned domain with zero overlap against active concurrent workers.
-- [ ] `forbidden_paths` protects central routers, bootstrap entrypoints, CI configs, and other workers' files.
-- [ ] Shared semantic resources (migration sequence numbers, ports, route patterns) are explicitly allocated.
-
-## 3. Contract completeness
-- [ ] Measurable objective and boolean Success Predicate are defined.
-- [ ] Non-counting outcomes are specified to block superficial or incomplete implementations.
-- [ ] Exact project test commands and quality gate scripts are specified.
-- [ ] Expected deliverable files are enumerated.
-- [ ] Stop conditions and escalation paths are explicit.
-
-## 4. Quality gate disposition
-- [ ] Evaluated against the Prompt Quality Gate.
-- [ ] Gate disposition is confirmed as `READY`.
+Do not dispatch simply because an agent is idle. **Safe readiness + prompt readiness** matter more than utilization.

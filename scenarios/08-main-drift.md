@@ -1,27 +1,27 @@
-# Scenario: Main Branch Drift After Audit
+# Scenario: Main Drift
 
 ## Trigger
-The main branch advances with new commits while an accepted candidate branch is awaiting integration.
+Main changes between audit and merge.
 
 ## Risk
-Latent regressions introduced by interactions with newly merged code.
+Audit evidence is based on an old baseline; the new combination has not been verified.
 
 ## Evidence
-`git log <base>..origin/main` shows new commits since the candidate baseline.
+Audited base SHA; current main SHA; candidate SHA.
 
 ## Immediate Action
-Mark earlier audit as `STALE_AUDIT_SHA`. Block direct merge.
+Block automatic promotion; rebuild/revalidate merge candidate.
 
 ## Forbidden Response
-Never merge an audited candidate into an advanced main branch without re-verification.
+Do not claim that main drift is irrelevant because the candidate was already audited.
 
 ## Recovery Procedure
-Rebase candidate onto updated main or merge main into the candidate branch. Execute test gates against the new commit SHA.
+Rebase/merge current main according to policy, create a new identity when necessary, and rerun gates.
 
 ## Exit Criteria
-New candidate commit SHA passes forensic re-audit and enters the merge queue.
+Resulting candidate/integration evidence fresh.
 
 ## Example Lead Response
 ```text
-Main drifted by 2 commits. Rebasing feat/wp-210. Earlier audit invalidated. Re-executing targeted test suite against new SHA.
+Main receives a security patch after the WP audit; Integrator revalidates with the patch.
 ```

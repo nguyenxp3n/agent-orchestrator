@@ -1,111 +1,118 @@
-# Source Synthesis Map
+﻿# Source Synthesis Map
 
 ## V1: agent-orchestrator-framework
 
-Retained: Zero Trust and Zero Hallucination invariants, exhaustive requirement barem reviews, strict filesystem resource boundary enforcement, atomic completion gates, multi-layered forensic Git, filesystem, and test verification, and anonymized multi-agent field incident logs.
+Retain: Zero Trust/Zero Hallucination, exhaustive rubric review, resource boundary enforcement, strict completion gate, forensic Git/filesystem/test verification, and anonymized field incidents.
 
 ## V2: orchestrator-framework-v2.0.0
 
-Retained at methodology level: Project Intelligence ingestion, Work Package contracts, dependency DAGs, resource ownership modes, semantic resource allocation, leases and lock management, assignment generation counters, separate agent and Work Package state models, Recovery Bundles, stale generation rejection, independent forensic audits, immutable candidate commit binding, dependency-aware integration queues, Cross-WP Gates, and 15 standardized conformance scenarios.
+Retain at the methodology level: Project Intelligence; Work Package contract; DAG; ownership modes; semantic resources; locks/leases; assignment generation; separate agent/WP states; Recovery Bundle; stale generation rejection; independent audit; immutable audit target; dependency-aware integration; Cross-WP Gate; 15 conformance scenarios.
 
-Excluded from Agent Orchestrator: Mandating Python runtimes, persistent control plane daemons, executable scheduler binaries, schema validator web services, or specialized adapter runtimes.
+Remove from the framework: any requirement for a Python runtime, persistent control plane, executable scheduler, schema validator service, or adapter runtime.
 
 ## AI Project Finalization Workflow V2
 
-Retained: Subject-based authority trees, status names reflecting genuine assurance levels, protected stop conditions, audit closure discipline, and explicitly rejecting the assumption that `BUILD_READY` implies production-verified readiness.
+Retain: subject-specific source authority; state names as assurance levels; protected stop conditions; audit closure discipline; do not infer production validation from `BUILD_READY`.
 
-## Legacy Runtime Prototypes
+## Previous Runtime
 
-Distilled into core role definitions for Orchestrator, Worker, Auditor, and Integrator alongside the foundational principle of evidence-before-acceptance. Runtime execution code was deliberately excluded to keep the framework portable.
+Extract the Orchestrator/Worker/Auditor/Integrator role prompts and evidence-before-acceptance rule. Do not reuse runtime code as the product core.
 
-## Multi-Agent Field Experience
+## Field Experience: anonymized six-agent project
 
-Synthesized operational lessons: Fully isolated workspaces, reserved semantic resource slots, immediate out-of-scope boundary rejection, strictly bounded shared configuration extensions, distinct security domain boundaries, detection of missing required deliverable layers, independent external CI verification, and topological sequential merges.
+Retain only generalized lessons: isolated workspaces; allocated semantic resource slots; infrastructure scope rejection; bounded shared-config extension; security-domain separation; missing-required-layer detection; external CI verification; sequential merge.
 
-# Prompt Engineering Research Inputs
+# Prompt Engineering Research Inputs: 2026-09-23
 
-The following external research sources were used to **synthesize underlying engineering principles**, avoiding verbatim prompt duplication or vendor-specific API dependencies.
+The following sources are used to **synthesize principles**, without copying prompts verbatim or making the framework vendor-dependent.
 
 ## addyosmani/agent-skills
 
 Source: `https://github.com/addyosmani/agent-skills`
 
-Retained principles:
-- Skills must define executable workflows rather than passive documentation.
-- Verification procedures, exit criteria, known anti-patterns, and trigger conditions must be explicit.
-- Context should be introduced progressively rather than loaded into a single monolithic prompt.
+Retain:
 
-### Specific Context Engineering Insights
+- skills must describe executable workflows rather than provide reference prose only;
+- verification, exit criteria, anti-patterns, and trigger conditions should be explicit;
+- use progressive context instead of loading all knowledge into one prompt.
+
+### Specific context-engineering skill
 
 Source: `https://github.com/addyosmani/agent-skills/blob/main/skills/context-engineering/SKILL.md`
 
-Retained principles:
-- Context hierarchy: Persistent rules -> specification/architecture -> relevant source code -> current errors/evidence -> historical logs.
-- Load only relevant specification fragments.
-- Inspect related files, tests, and interfaces prior to making code modifications.
-- Assign lower trust classifications to generated or external content compared to project-owned source code.
-- Prioritize context quality and relevance over sheer volume.
+Retain:
+
+- context hierarchy: persistent rules â†’ spec/architecture â†’ relevant source â†’ current errors/evidence â†’ history;
+- load only the relevant spec fragment;
+- read relevant files/tests/interfaces before editing;
+- classify external/generated content as lower trust than project-owned sources;
+- context quality > context quantity.
 
 ## github/awesome-copilot
 
 Source: `https://github.com/github/awesome-copilot`
 
-Retained principles:
-- Structured prompt anatomy: Identity, core responsibilities, execution methodology, constraints, and explicit output requirements.
-- Focused subagent encapsulation with minimal shared context and exact expected deliverables.
-- Imperative, action-oriented instructions.
-- Role-specific tool ceilings where supported by the underlying harness.
-- Maintain reusable skills, static instructions, and specialized agents as distinct architectural layers rather than collapsing them into a single massive prompt.
+Retain:
+
+- agent prompt anatomy: identity, responsibilities, methodology, constraints, output expectations;
+- focused subagent wrappers with minimal shared context + exact expected outputs;
+- imperative/action-oriented instructions;
+- role-specific tool ceilings when supported by the harness;
+- reusable skills/instructions/agents are different layers and should not be collapsed into one large prompt.
 
 ## anthropics/claude-plugins-official
 
 Source: `https://github.com/anthropics/claude-plugins-official`
 
-Retained principles:
-- Progressive disclosure: Lean core instructions paired with on-demand references, examples, and scripts.
-- Precise, unambiguous trigger definitions for skills and specialized agents.
-- Imperative instructions combined with focused domain boundaries.
-- Rigorous trigger and quality validation prior to considering an artifact complete.
+Retain:
 
-Vendor-specific frontmatter syntax and tool-calling semantics are intentionally decoupled from the framework's core invariants.
+- progressive disclosure: lean core + references/examples/scripts only when needed;
+- skill/agent trigger descriptions must be specific;
+- imperative instructions and focused domain boundaries;
+- validate/test trigger quality and artifact quality before considering the artifact complete.
+
+Vendor-specific frontmatter/tool syntax does not become an invariant.
 
 ## wshobson/agents
 
 Source: `https://github.com/wshobson/agents`
 
-Retained principles:
-- A single Markdown specification can drive multiple agent harnesses by framing instructions around actions and outcomes rather than tool-specific vocabularies.
-- Primary context files should function as structured tables of contents, delegating operational details to on-demand references.
-- Enforce strict invariants while leaving non-critical implementation mechanics flexible.
-- Multi-layered quality evaluation: Deterministic structural checks, semantic evaluation, and repeated reliability verifications where valuable.
+Retain:
 
-Harness-specific model mappings and adapters in this repository serve as reference examples rather than rigid requirements.
+- one Markdown source can serve multiple harnesses when the body describes actions rather than tool vocabulary;
+- a context file should act as a table of contents, with details in on-demand references;
+- enforce invariants without hard-coding implementation;
+- quality evaluation should combine a deterministic structural layer + semantic evaluation + repeated reliability checks when the cost is justified.
+
+Model mappings and harness adapters in this repository are references only; do not hard-code them into the framework.
 
 ## muratcankoylan/Agent-Skills-for-Context-Engineering
 
 Source: `https://github.com/muratcankoylan/agent-skills-for-context-engineering`
 
-Retained principles:
-- Context encompasses the entire inference state, not merely the immediate prompt text.
-- Subagents function primarily as context isolation boundaries.
-- Long-horizon assignments require explicit definitions, exact success predicates, non-counting outcome verifications, adversarial failure-mode checklists, artifact-based deliverables, and audit-gated returns.
-- Persistence must be paired with continuous independent verification.
-- Early worker independence and divergence offer significant value during exploratory architectural phases.
-- Prompts should remain lean and outcome-focused, avoiding over-prescription of implementation details once invariants and acceptance criteria are firmly established.
+Retain:
+
+- context includes the full inference state, not only prompt text;
+- subagents primarily provide context isolation;
+- a long-horizon brief requires definitions, an exact success predicate, non-counting outcomes, an adversarial failure-mode checklist, artifact-based reporting, and an audit-gated return;
+- persistence must be paired with verification;
+- early worker independence/diversity is useful in open-ended search;
+- prompts should be lean and outcome-first; do not over-prescribe the path when invariant/outcome is already sufficiently clear.
 
 ## Prompt Synthesis Principle
 
-The Agent Orchestrator Prompt Engineering System operates on the following rules:
+The AGENT-ORCHESTRATOR Prompt Engineering System applies these principles:
 
 ```text
-Compile project truth: do not decorate vague user requests.
-Curate targeted context: do not dump indiscriminate files.
-Lock outcomes and boundaries: avoid dictating internal implementation choices.
-Demand concrete evidence: disregard unsubstantiated agent claims.
-Explicitly reject answer-shaped approximations on critical requirements.
-Keep the core portable: avoid hard-coding harness-specific syntax.
+Compile project truth, do not decorate vague requests.
+Curate context, do not dump context.
+Lock outcomes and boundaries, not unnecessary implementation details.
+Require evidence, not confidence.
+Reject answer-shaped near misses explicitly when material.
+Keep portable core independent from harness syntax.
 ```
 
-# Overall Synthesis Summary
+# Overall Synthesis Principle
 
-Agent Orchestrator preserves the **rigorous governance and quality controls** of V1 and V2 while delivering them as a **practical field manual, operational toolkit, and Prompt Compiler system**. Strictness focuses on invariants and verifiable evidence, while operational mechanics adapt smoothly across diverse projects, models, and execution harnesses.
+AGENT-ORCHESTRATOR preserves the **governance strength** of V1/V2 while using a **field manual + operational toolkit + Prompt Compiler methodology** delivery form. Strictness applies to invariants/evidence; mechanism and syntax adapt to the project/model/harness.
+

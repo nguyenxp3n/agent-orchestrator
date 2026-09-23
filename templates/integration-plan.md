@@ -1,30 +1,48 @@
 # Template: Sequential Integration Plan
 
+## Integration Batch
+
 ```text
-INTEGRATION_RUN_ID: INT-<timestamp>
-INTEGRATOR_ROLE: <integrator identifier>
-TARGET_BRANCH: main | integration
-
-INTEGRATION_QUEUE (Topological DAG Order):
-1. WP-<id> (Candidate SHA: <sha>, Audit ID: <audit_id>, Status: QUEUED)
-2. WP-<id> (Candidate SHA: <sha>, Audit ID: <audit_id>, Status: PENDING_DEPENDENCY)
-
-PER-PACKAGE MERGE PROTOCOL:
-For each accepted package in sequence:
-1. Verify candidate SHA matches audited SHA exactly.
-2. Verify main branch baseline has not drifted.
-3. Merge branch:
-   git merge --no-ff <branch> -m "merge: integrate <WP_ID>"
-4. Apply approved Integration Requests to shared hotspots.
-5. Execute cross-package verification gate:
-   - Run canonical global test suite
-   - Run contract schema validations
-   - Run critical end-to-end user journeys
-6. If tests pass, proceed to next package.
-7. If tests fail: halt, isolate failing candidate, and revert merge.
-
-FINAL RELEASE GATE:
-- Cloud CI pipeline run ID: <id>
-- Cloud CI status: SUCCESS
-- Final commit SHA: <merged main sha>
+Batch ID:
+Integration branch/workspace:
+Baseline main SHA:
+Repository merge policy: no-ff | squash | rebase | other
+Global QA command:
+Cloud CI inspection method:
 ```
+
+## Dependency-Aware Queue
+
+| Order | WP | Dependency ready? | Audited SHA | Audit disposition | Integration Requests |
+|---:|---|---|---|---|---|
+| 1 | | | | ACCEPT | |
+
+## Pre-Merge Checks
+
+- candidate SHA matches audit;
+- current main drift evaluated;
+- dependencies integrated;
+- resource/migration ordering valid;
+- working tree clean.
+
+## Merge Procedure
+
+```bash
+git switch <integration-branch>
+git merge --no-ff <candidate-branch>
+<global-quality-command>
+```
+
+Replace the merge command when repository policy differs.
+
+## Cross-WP Gates
+
+Build/test, contracts, migrations, critical journeys, security checks, startup/smoke.
+
+## Failure Handling
+
+Stop the queue at the first blocking failure; classify candidate vs integration vs environment; create a corrective WP/DR instead of continuing to merge later WP candidates.
+
+## Release Evidence
+
+Record the resulting SHA, included WP/audit IDs, command exit codes, CI run IDs, waivers, and unverified external environments.

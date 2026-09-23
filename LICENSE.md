@@ -1,5 +1,5 @@
-# License Notice
+﻿# License Notice
 
-This documentation and operational framework is released for open use, reproduction, modification, and integration into internal workflows and personal projects. When distributing modified versions, retain attribution and clearly document adjustments to distinguish canonical standards from local customizations.
+This documentation set is released for use, copying, modification, and integration into internal or personal workflows. When distributing a modified version, retain version information and clearly document changes so users can distinguish canonical AGENT-ORCHESTRATOR content from local extensions.
 
-The framework provides operational methodology; it carries no warranty that generated software will be free of defects or suitable for every production environment. System operators retain full responsibility for secrets, credential security, infrastructure integrity, data governance, and release management.
+The framework does not guarantee that software produced by agents is defect-free, vulnerability-free, or suitable for every production environment. Operators remain responsible for secrets, access control, infrastructure, data, and actual releases.

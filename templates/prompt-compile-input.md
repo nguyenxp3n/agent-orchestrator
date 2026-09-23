@@ -1,38 +1,41 @@
-# Template: Prompt Compile Input
+# Prompt Compile Input Template
 
 ```text
-TARGET_ROLE: Worker | Auditor | Integrator | Arbitrator
-WP_ID: <package id>
-OBJECTIVE: <concrete deliverable outcome>
-SUCCESS_PREDICATE: <verifiable condition defining success>
-SELECTED_PROMPT_MODE: Compact | Standard | Long-Horizon
+TARGET_ROLE:
+PROMPT_MODE_HINT: AUTO | COMPACT | STANDARD | LONG_HORIZON
+
+OBJECTIVE:
+SUCCESS_PREDICATE:
+
+PROJECT_TRUTH_REFERENCES:
+-
+
+WORK_PACKAGE:
+DEPENDENCIES:
 
 CONTEXT_REFERENCES:
-- Authoritative specs: <file paths and section titles>
-- Frozen contracts: <schema file paths>
-- Relevant source files: <target files>
+- path/id/section:
+  authority: AUTHORITATIVE | VERIFY_BEFORE_USE | UNTRUSTED_DATA
+  relevance:
 
-BOUNDARY_ENVELOPE:
-- allowed_paths: []
-- readonly_paths: []
-- forbidden_paths: []
+ALLOWED_PATHS / OWNED_DOMAINS:
+READONLY_PATHS:
+FORBIDDEN_PATHS:
 
-ALLOCATED_RESOURCES:
-- Sequence numbers:
-- Ports / routes / queues:
+RESOURCE_ALLOCATIONS:
+FROZEN_CONTRACTS:
 
 EXPECTED_OUTPUTS:
-- <deliverable file 1>
-- <deliverable file 2>
-
 NON_COUNTING_OUTCOMES:
-- <anti-near-miss condition 1>
-- <anti-near-miss condition 2>
 
-VERIFICATION_COMMANDS:
-- <exact test command 1>
-- <exact quality gate command 2>
+VERIFICATION:
+- criterion:
+  evidence_source:
+  command_or_check:
+  expected_signal:
 
-STOP_CONDITIONS:
-- <boundary violation, contract drift, schema contradiction>
+STOP_OR_ESCALATION:
+OUTPUT_CONTRACT:
+HARNESS_CAPABILITIES:
+KNOWN_UNKNOWNS:
 ```

@@ -1,10 +1,21 @@
-# Playbook: Specification Contradiction
+# Playbook: Specification Conflict
 
 ## Trigger
-Authoritative documentation contradicts existing code, or two specification documents make conflicting claims.
+Two authoritative sources, or the spec and repository evidence, conflict.
 
 ## Procedure
-1. **Pause affected package**: Halt work on the conflicting component; continue orthogonal tasks.
-2. **Determine domain authority**: Identify which source holds governing authority for the specific domain (e.g., OpenAPI schemas govern API wire contracts; migrations govern database schemas).
-3. **Escalate equal-authority conflicts**: If sources of equal precedence conflict without documented precedence, construct a formal Decision Request presenting trade-offs to the human project authority.
-4. **Recompile task prompt**: Once resolved, update authoritative documentation, record the decision in the Decision Ledger, and recompile the affected worker prompt.
+Determine the subject: business, API, DB, security, build, deployment. Apply authority by subject. If equal-authority sources conflict without supersession evidence, create a Decision Request.
+
+```text
+FACT A + source
+FACT B + source
+SUBJECT AUTHORITY
+IMPACT
+OPTIONS
+```
+
+## Forbidden Response
+Do not apply a universal rule that “code is always right” or “spec is always right”; do not blend two conflicting semantics into a third solution.
+
+## Exit Criteria
+The decision has authority, downstream context is refreshed, and the affected candidate is reverified.

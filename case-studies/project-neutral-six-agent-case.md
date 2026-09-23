@@ -2,39 +2,39 @@
 
 ## 1. Purpose
 
-This case study **does not represent a mandatory project structure**. It provides a neutral reference model demonstrating how an AI Lead Orchestrator coordinates six concurrent agents across any software repository characterized by parallel workstreams, shared resources, and integration hotspots.
+This case study **does not define a required project structure**. It is a neutral model showing how a Lead Orchestrator coordinates six agents on any software project with parallel work, shared resources, and integration hotspots.
 
-Labels such as `Domain A`, `Domain B`, `Domain C`, `UI/Client`, `Infrastructure`, and `CI/CD` are illustrative roles. In actual practice, the Lead substitutes real domains discovered from repository inputs.
+The labels `Domain A`, `Domain B`, `Domain C`, `UI/Client`, `Infrastructure`, and `CI/CD` are illustrative roles. In actual use, the Lead must replace them with real domains discovered from project input.
 
-Example domain mappings:
+Example mapping:
 
-| Project Type | Domain A/B/C Examples | UI/Client Examples | Common Shared Hotspots |
+| Project type | Domain A/B/C may be | UI/Client may be | Common shared hotspot |
 |---|---|---|---|
-| Web Fullstack | Auth, billing, search | Web application views | Central router, database migrations, OpenAPI schema |
-| Microservices Backend | Service A, B, C | Consumer/client SDK | Protobuf schemas, event contracts, API gateway |
-| Mobile App | Sync engine, user profile, cache | Native feature screens | Navigation graph, shared model types, API client |
-| Distributed System | Scheduler, worker, storage | Operator CLI / admin console | Protocol schemas, state coordination, network ports |
-| CLI Tool | Flag parser, command groups, config | Terminal UX, help formats | Root command registry, global config schema |
+| Web Fullstack | auth, billing, search | web feature/module | router, DB migrations, OpenAPI |
+| Microservices Backend | service A/B/C | consumer/client SDK | proto/schema, event contract, gateway |
+| Mobile App | sync, profile, offline cache | screens/features | navigation, shared model, API contract |
+| Distributed System | scheduler, worker, storage | admin/control client | protocol/schema, leader state, ports |
+| CLI Tool | parser, command groups, config | CLI UX/help | root command registry, config schema |
 
-## 2. Project input as the single source of truth
+## 2. Project input is the source of truth
 
-The Lead begins with actual repository inputs rather than pre-baked case study templates:
+The Lead does not start from the case study name. The Lead starts from actual project input:
 
 ```text
-Architecture documentation (docs/ or equivalent)
-Formal specifications (spec/ or equivalent)
-Implementation plans (plan/ or equivalent)
-Engineering workflows (workflow/ or equivalent)
-Repository filesystem tree
-Build and test manifests
-CI/CD configuration files
-Database schema and migration models (if applicable)
-Environment profiles and constraints
+architecture docs / docs-equivalent
+specifications / spec-equivalent
+implementation plan / plan-equivalent
+workflow / engineering process
+repository tree
+build + test manifests
+CI configuration
+DB/schema/migration model if applicable
+environment constraints
 ```
 
-Directory names like `docs/`, `spec/`, `plan/`, and `workflow/` are common examples. When a project uses ADRs, RFCs, issues, Makefiles, Cargo workspaces, Xcode configurations, Gradle, Bazel, Helm, or Terraform, the Lead discovers and compiles them into the Project Execution Profile.
+The directory names `docs/`, `spec/`, `plan/`, and `workflow/` are common examples. If the project uses ADRs, RFCs, tickets, Makefile, a Cargo workspace, an Xcode project, Gradle, Bazel, Helm, Terraform, or another structure, the Lead must discover those sources and compile them into the Project Execution Profile.
 
-## 3. Generalized six-agent topology
+## 3. Generalized six-agent model
 
 ```text
 Lead Orchestrator
@@ -43,96 +43,103 @@ Lead Orchestrator
   +-- A2 Domain B          [Resource Slot R2]
   +-- A3 Domain C          [Resource Slot R3]
   +-- A4 UI / Client       [Resource Slot R4 or contract consumer]
-  +-- A5 Infrastructure    [Isolated infrastructure ownership]
-  +-- A6 CI/CD             [Pipeline workflow ownership]
+  +-- A5 Infrastructure    [isolated infra ownership]
+  +-- A6 CI/CD             [workflow ownership]
 
 All workers -> Completion Claim -> Independent Audit
 Accepted queue -> DAG-aware Sequential Integration -> Global QA -> Cloud/External CI
 ```
 
-A `Resource Slot` may represent a database migration sequence number, network port, queue topic, schema namespace, CLI command flag, or feature flag. Repositories without databases do not construct artificial migration slots.
+A `Resource Slot` may be a migration ID, port, queue name, schema namespace, event name, CLI command namespace, feature flag, or another semantic resource. If the project has no migrations, do not invent a migration concept.
 
-## 4. Incident A: Worker reports completion while omitting required layers
+## 4. Incident A: Worker reports done while a required layer is missing
 
-Suppose Work Package D specifies:
+Assume WP-D requires:
+
 ```text
-Backend service implementation
-Client UI integration
-Contract adaptation
-Unit and integration tests
+backend/service implementation
+client/UI integration
+contract adaptation
+unit tests
 ```
 
-The worker reports that backend logic and unit tests pass cleanly, but client interface components were never created. The Auditor concludes:
+The Worker reports that backend and tests are green, but the client/UI artifact does not exist. The Auditor must conclude:
 
 ```text
 Implemented subset: PASS
 Tests for implemented subset: PASS
-Required client interface deliverables: MISSING
-Work Package disposition: REJECT_REWORK / INCOMPLETE
+Required client/UI outputs: MISSING
+WP: REJECT_REWORK / INCOMPLETE
 ```
 
-In a CLI project, "client interface" might correspond to root command registration and help outputs; in microservices, it might represent consumer integration adapters. The governing principle is **Atomic Completion**, not a specific file path.
+For a CLI project, “client/UI” may map to root command registration/help output; for microservices, it may map to a consumer contract or integration adapter. The governing principle is **Atomic Completion**, not a specific file path.
 
-## 5. Incident B: Worker attempts uncoordinated edits to shared hotspots
+## 5. Incident B: Worker requests access to a shared resource outside scope
 
-Suppose the Infrastructure Worker discovers a need to modify a shared routing table, gateway configuration, or central bootstrap entrypoint outside its assigned boundary.
+Assume the Infrastructure Worker discovers that a shared schema/gateway/root bootstrap change is needed outside its ownership.
 
-The Lead rejects direct write access because:
-- The resource belongs to another package or is designated `INTEGRATION_ONLY`.
-- Shared hotspots carry broad cross-package blast radiuses.
-- The worker does not hold authority over the global domain contract.
+The Lead denies the direct write because:
 
-Resolution: The worker maintains changes within its assigned scope and submits a formal `Integration Request` or `Resource Request`, which the Integrator applies during sequential integration.
+- the resource already belongs to another WP or is `INTEGRATION_ONLY`;
+- the shared hotspot has cross-WP blast radius;
+- the worker does not own that domain contract.
 
-Operational rule: **Rejecting scope expansion early is far less costly than resolving merge collisions late.**
+Resolution: keep implementation within allowed scope, submit an `Integration Request` or `Resource Request`, or create a corrective WP if the dependency genuinely requires a change.
 
-## 6. Incident C: Controlled and bounded scope extensions
+Lesson: **rejecting scope expansion early costs less than resolving a late collision**.
 
-Not every out-of-scope request is invalid. When a worker proves that modifying a shared build script is required to expose its deliverable, the Lead grants **minimal write access to that specific file**, accompanied by strict invariants and extra test gates:
+## 6. Incident C: Controlled scope extension
+
+Some out-of-scope requests are valid. If the Worker proves that a shared build/task configuration must change to expose the deliverable, the Lead may grant **the smallest necessary file/resource**, with explicit invariants and quality gates.
+
+Neutral example:
 
 ```text
-Granted path: <shared-build-configuration-file>
+Granted: <shared-build-or-task-config>
 Conditions:
-- Existing build tasks and targets must remain intact
-- Repository quality gate must exit with code 0
-- Contract schema validation must pass
+- preserve existing commands/tasks
+- project quality gate remains green
+- spec/contract validation remains green when applicable
 ```
 
-The framework does not mandate specific build runners; projects may use `Makefile`, `package.json`, `Cargo.toml`, `build.gradle`, `justfile`, Bazel, or Xcode settings.
+The framework does not force `Taskfile.yml`; a project may use `Makefile`, `package.json`, `Cargo.toml`, `build.gradle`, `justfile`, Bazel, Xcode settings, or another tool.
 
-## 7. Incident D: Direct verification of external CI runs
+## 7. Incident D: Verify External CI directly
 
-A worker claiming that cloud CI passed represents an unverified assertion. The Lead or Auditor inspects the pipeline execution directly:
+A worker report that cloud CI succeeded is only a claim. The Lead/Auditor must verify a run tied to the exact candidate SHA through the relevant provider.
+
+GitHub example:
 
 ```bash
 gh run list --branch <branch> --limit 10
 gh run view <run-id>
 ```
 
-For GitLab, Bitbucket, Jenkins, or Buildkite, use equivalent APIs or CLIs. When external pipeline access is unavailable, record `UNVERIFIED_EXTERNAL_CI` rather than assuming success.
+GitLab/Bitbucket/Jenkins/Buildkite or another system uses the corresponding API/CLI. If access is unavailable, the state is `UNVERIFIED_EXTERNAL_CI`; do not promote it to PASS.
 
-## 8. Sequential integration in practice
+## 8. Sequential Integration
 
-Following independent audit approval, branches are never merged simultaneously. The Lead and Integrator execute sequential merges governed by DAG prerequisites, running global cross-package test suites after every step:
+After independent acceptance, candidates must not be merged in bulk. The Lead/Integrator selects order by DAG/resource dependencies, integrates one candidate at a time, and runs cross-WP/global verification after each step.
 
 ```text
 ACCEPTED WP-A
-   -> merge to main
-   -> global verification gate
+   -> integrate
+   -> global gate
 ACCEPTED WP-B
-   -> merge to main
-   -> global verification gate
+   -> integrate
+   -> global gate
+...
 ```
 
-## 9. Key takeaways
+## 9. Derived operating principles
 
-1. Actual repository inputs determine task decomposition, not generic case studies.
-2. The Lead maps expected deliverables to actual project types and concrete Work Packages.
-3. Semantic resources must be allocated before concurrent workers begin execution.
-4. Shared hotspots must not be assigned to multiple concurrent workers simultaneously.
-5. The Lead rejects unapproved scope expansion requests by default.
-6. Legitimate scope extensions must be strictly bounded, explicit, and audited with additional verification gates.
-7. External CI runs require direct evidence; missing access must be recorded as `UNVERIFIED`.
+1. Actual project input determines decomposition, not the case study.
+2. The Lead must map expected outputs to the actual project type and WP.
+3. Semantic resources must be allocated before concurrent writers exist.
+4. Shared hotspots must not be assigned to multiple workers at the same time.
+5. The Lead must block unapproved scope expansion.
+6. A valid scope extension must be bounded, explicit, and subject to additional verification.
+7. External CI/status requires direct evidence or must be recorded as `UNVERIFIED`.
 8. `WORKER_DONE != ACCEPTED`.
-9. Integration sequence follows the dependency DAG, never worker completion speed.
-10. The framework assumes no mandatory technology stack: it operates on any programming language, build tool, or deployment model.
+9. Integration order follows dependencies, not worker speed.
+10. The framework does not assume Web, DB, Docker, migrations, or any specific toolchain.

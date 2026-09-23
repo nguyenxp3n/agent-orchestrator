@@ -14,7 +14,7 @@ Branch/workspace:
 
 ## Objective
 
-A concrete, measurable outcome. Avoid vague descriptions like "improve service."
+A verifiable outcome, not a vague description such as “improve module.”
 
 ## Source Requirements
 
@@ -42,35 +42,35 @@ forbidden_paths: []
 ## Resource Allocations
 
 ```text
-Migration slot:
+Migration Slot:
 Ports:
-Database objects:
+DB objects:
 Routes/events/queues:
-Environment variables / feature flags:
+Env vars/feature flags:
 Other exclusive resources:
 ```
 
 ## Expected Outputs
 
-List deliverables by layer: database migrations, backend services, frontend/mobile views, contracts, tests, documentation, and generated artifacts.
+List by layer: database, backend, frontend/mobile, contracts, tests, docs, generated artifacts.
 
 ## Acceptance Criteria
 
-Every criterion must be measurable with an expected evidence source or test command.
+Every criterion must be measurable and have an expected evidence source/command.
 
 ## Verification Commands
 
 ```text
-Targeted tests:
-Repository global gate:
-Contract/schema validation:
-Security/regression checks:
+Target tests:
+Repo/global gate:
+Contract/schema checks:
+Special security/regression checks:
 ```
 
 ## Stop Conditions
 
-Scope or resource expansion required; specification conflict; security decision; destructive database modification; stale upstream contract; workspace baseline mismatch.
+Scope/resource expansion; spec conflict; security decision; destructive action; stale upstream contract; workspace/base mismatch.
 
 ## Completion Contract
 
-Worker submits changed files, HEAD commit SHA, deliverable checklist, test commands and exit codes, resource usage, unresolved items, and formal requests. Workers never self-accept.
+The Worker submits changed files, HEAD SHA, expected-output check, commands + exit codes, resource usage, unresolved items, and requests. The Worker does not self-accept.

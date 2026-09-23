@@ -1,11 +1,18 @@
-# Playbook: Database Migration Collision
+# Playbook: Migration Collision
 
 ## Trigger
-Two branches generate migrations with identical sequence numbers or conflicting schema changes.
+Two branches use the same migration ID, or a worker needs an unallocated migration.
 
-## Procedure
-1. **Halt integration**: Block merging for both candidate branches.
-2. **Validate assigned slots**: Check the Resource Registry to identify which package owned the allocated slot.
-3. **Reassign sequence number**: Assign the next sequential migration slot to the unassigned package.
-4. **Update candidate branch**: The affected worker updates its migration filename and internal references.
-5. **Re-audit modified candidate**: Re-execute migration upgrade and downgrade test suites, capture the new commit SHA, and conduct a fresh audit.
+## Immediate Action
+Stop affected integration. Determine the slot owner from the Resource Registry; do not renumber based on intuition.
+
+```bash
+find migrations -maxdepth 1 -type f | sort
+git diff <base>...HEAD -- migrations/
+```
+
+## Resolution
+Preserve the valid owner's slot; allocate a new slot to the other WP; update filenames/references/tests; verify dependency ordering; if candidate identity changes, re-audit.
+
+## Exit Criteria
+No duplicate ID, valid dependency sequence, passing up/down semantics, and a new audit bound to the correct SHA.

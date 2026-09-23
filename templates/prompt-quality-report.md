@@ -1,25 +1,37 @@
-# Template: Prompt Quality Report
+# Prompt Quality Report Template
 
 ```text
-EVALUATION_DATE: <timestamp>
-COMPILED_FOR_WP: <package id>
-TARGET_ROLE: <role>
-EVALUATOR: Lead Orchestrator
+PROMPT_ID:
+TARGET_ROLE:
+MODE:
+PROMPT_STATUS: READY | NOT_READY | ESCALATE
 
-QUALITY_DIMENSIONS:
-1. Objective & Success Predicate clarity: PASS | FAIL
-2. Context hygiene (no raw code dumps): PASS | FAIL
-3. Boundary & permission envelope precision: PASS | FAIL
-4. Deliverable enumeration completeness: PASS | FAIL
-5. Anti-near-miss outcome protection: PASS | FAIL
-6. Verification commands and exit codes bound: PASS | FAIL
-7. Stop and escalation conditions explicit: PASS | FAIL
-8. Machine-readable output contract included: PASS | FAIL
+CRITICAL_GAPS:
+-
 
-RED-TEAM ADVERSARIAL INSPECTION:
-- Potential loophole identified: <description or none>
-- Loopholes closed in prompt draft: <description or none>
+CONTEXT_QUALITY:
+- sufficient:
+- irrelevant_bulk:
+- stale_or_unverified:
 
-DISPOSITION: READY | NOT_READY | ESCALATE
-RECOMPILE_ACTIONS_REQUIRED: <list of fixes if NOT_READY>
+BOUNDARY_CHECK:
+- ownership:
+- resources:
+- frozen_contracts:
+
+COMPLETION_CHECK:
+- success_predicate:
+- expected_outputs:
+- non_counting_outcomes:
+- verification_identity:
+
+RED_TEAM_FINDINGS:
+- loophole:
+  mitigation:
+
+PORTABILITY_FINDINGS:
+-
+
+RESIDUAL_UNKNOWNS:
+-
 ```

@@ -5,35 +5,36 @@ CAPTURE
   Role + Objective + Success Predicate
 
 GROUND
-  Project Truth + Relevant Context References
+  Project Truth + relevant Context References
 
 BOUND
-  Ownership Matrix + Resource Registry + Path Constraints
+  Ownership + Resources + Constraints
 
 COMPLETE
-  Expected Deliverable Files + Non-Counting Outcomes
+  Expected Outputs + Non-Counting Outcomes
 
 VERIFY
-  Acceptance Criterion -> Executable Command -> Output Evidence
+  Criterion -> Evidence -> Identity
 
 ESCALATE
-  Stop Conditions -> Decision Request -> Integration Request
+  Stop / DR / Resource / Integration Request
 
 COMPILE
-  Compact Mode | Standard Mode | Long-Horizon Mode
+  Compact | Standard | Long-Horizon
 
 RED-TEAM
-  Identify loopholes where literal compliance violates technical intent
+  How can literal compliance violate intent?
 
 QUALITY GATE
   READY | NOT_READY | ESCALATE
 
 DISPATCH
-  Dispatch prompts evaluated strictly as READY
+  Only READY prompts
 ```
 
-Governing rule:
+Short rule:
+
 ```text
-Do not optimize prompts for conversational eloquence.
+Do not optimize prompts for eloquence.
 Optimize them for correct action, bounded autonomy, and verifiable completion.
 ```

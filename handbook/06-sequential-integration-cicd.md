@@ -1,45 +1,45 @@
-# Chapter 6: Sequential Integration, Merge Queues, and CI/CD Verification
+# Chapter 6: Sequential integration and cloud CI/CD
 
-## 6.1 Why sequential integration is mandatory
+## 6.1 Why Sequential Integration
 
-Independent passing tests do not guarantee combined stability. Merging multiple feature branches simultaneously obscures the root cause of regressions and risks corrupting database migration sequences. Sequential integration preserves a clear causal chain of evidence:
+Multiple WPs passing independently does not prove they pass together. Bulk merging destroys the ability to identify which candidate caused a regression and can violate migration/contract ordering. Sequential integration preserves causal evidence.
 
 ```text
-ACCEPTED WP-A -> merge -> global test suite
-ACCEPTED WP-B -> merge -> global test suite
-ACCEPTED WP-C -> merge -> global test suite
+ACCEPTED WP-A -> merge -> global gate
+ACCEPTED WP-B -> merge -> global gate
+ACCEPTED WP-C -> merge -> global gate
 ```
 
-Batch merges are permitted only when packages are strictly orthogonal and project policy explicitly authorizes them. Merging all branches at once simply because their local tests passed is prohibited.
+Batching is acceptable when WPs are fully independent and project policy allows it, but “merge everything because it is green” is not the default.
 
-## 6.2 Integration ordering governed by the DAG
+## 6.2 Integration order by DAG
 
-Branches are merged according to the dependency graph, never by worker completion speed. If Work Package B depends on interface contracts or database tables created by Work Package A, Package A must be integrated first, even if Package B finishes earlier.
+Do not merge by worker completion time. If WP-B depends on contract/data from WP-A, A must integrate first even if B reaches `ACCEPTED` earlier.
 
 ```text
 WP-CONTRACT -> WP-BACKEND -> WP-E2E
             -> WP-FRONTEND -> WP-E2E
 ```
 
-The integration queue tracks dependency prerequisites and exact audit commit SHAs.
+The integration queue stores dependency readiness and candidate audit identity.
 
-## 6.3 Pre-merge verification
+## 6.3 Pre-merge gate
 
-Before executing any merge:
+Before merge:
 
 ```bash
 git fetch --all --prune
 git status --short
 git rev-parse HEAD
-# Verify candidate commit SHA matches audited commit SHA
-# Verify current main matches integration baseline
+# compare candidate SHA with audited SHA
+# compare current main with integration baseline
 ```
 
-If the main branch has advanced since the candidate was audited, assess the impact. Rebasing or merging main into the candidate generates a new commit identity that requires revalidation.
+If main drifts from the baseline after audit, assess impact: rebasing or merging main into the candidate creates a new candidate identity and usually requires revalidation.
 
-## 6.4 Non-fast-forward merges
+## 6.4 Merge `--no-ff`
 
-When repository standards maintain explicit branch history:
+When project policy requires preserving WP branch history:
 
 ```bash
 git switch main
@@ -47,23 +47,24 @@ git pull --ff-only
 git merge --no-ff feat/wp-210 -m "merge: integrate WP-210 review backend"
 ```
 
-The `--no-ff` flag is an operational preference rather than an absolute rule; repositories may enforce squash or rebase policies. The fundamental requirement is traceability: the merged change must link directly to the Work Package, verified audit logs, and candidate commit SHA. When squash merges are mandated, record the mapping from the original branch commit to the squashed commit SHA.
+`--no-ff` is not an absolute invariant; a repository may use squash or rebase merge. The invariant is traceability from integration back to the WP, audit evidence, and candidate identity. If repository policy requires squash, record the mapping from old commit → merge commit.
 
-## 6.5 Managing shared integration hotspots
+## 6.5 Shared hotspot resolution
 
-The Integrator holds restricted authority to apply approved Integration Requests to centralized routing tables, bootstrap manifests, or central dependency injection containers. The Integrator never uses this authority to perform arbitrary refactoring.
+The Integrator has narrow authority to apply approved Integration Requests to router/bootstrap/root config. Do not use that authority for incidental domain refactoring.
 
-When conflicts consist of simple textual overlaps with clear semantics governed by frozen contracts, the Integrator resolves the conflict and executes verification tests. If semantic contradictions arise, the Integrator halts and submits a Decision Request.
+If a conflict is purely textual and semantics are clear from a frozen contract, the Integrator resolves and verifies it. If semantics conflict, create a DR.
 
-## 6.6 Cross-Package verification gate
+## 6.6 Cross-WP Gate
 
-Following every merge or verified batch, execute:
-- Canonical build, lint, typecheck, and test commands
-- Schema and event contract validations
-- Database migration sequence checks and upgrade/downgrade cycles
-- Critical user journey end-to-end tests
-- Application smoke tests and health checks
-- Security scanning tools
+After each merge or safe batch, run:
+
+- canonical build/lint/typecheck/test;
+- contract/schema/event validation;
+- migration ordering + upgrade/downgrade when required by the project;
+- critical E2E journeys;
+- smoke/startup checks;
+- applicable security checks.
 
 ```bash
 <project-global-quality-command>
@@ -71,87 +72,91 @@ Following every merge or verified batch, execute:
 <critical-e2e-command>
 ```
 
-Local success in an isolated worktree does not guarantee repository-wide integration success.
+Independent WP success is not project success.
 
-## 6.7 Pull request governance
+## 6.7 Pull Request workflow
 
-When using platforms such as GitHub, GitLab, or Bitbucket, include:
+When using GitHub/GitLab/Bitbucket, a PR/MR should include:
 
 ```text
-WP ID and package objective
-Prerequisite dependencies
-Audited candidate commit SHA
-Audit report link and final disposition
-List of modified paths and semantic resources
-Verification commands and exit codes
-Required integration actions
-Documented risks or temporary waivers
+WP ID + objective
+Dependencies
+Candidate SHA
+Audit disposition + evidence location
+Changed paths/resources
+Verification commands + results
+Integration requests
+Known risks/waivers
 ```
 
-A pull request provides a clean audit surface; it does not substitute for local test execution or automated CI pipelines.
+A PR is an audit surface, not evidence that replaces local/CI checks.
 
 ## 6.8 Cloud CI/CD verification
 
-Verify automated pipeline runs directly rather than assuming success:
+Do not trust “GitHub Actions is green” when direct verification is possible. GitHub CLI example:
 
 ```bash
 gh run list --branch <branch> --limit 10
 gh run view <run-id>
 ```
 
-For GitLab or Bitbucket, use equivalent API or CLI tools. Record the pipeline run ID, commit SHA, completed jobs, and final outcome. Confirm that the pipeline run corresponds exactly to the commit being merged.
+GitLab/Bitbucket use the corresponding API/CLI. Record run ID, commit SHA, jobs, and conclusion. Ensure the CI run actually belongs to the candidate being merged.
 
-## 6.9 Diagnosing cloud pipeline failures
+A field case used this exact pattern to verify cloud jobs directly instead of relying on a worker report. The provider does not change the invariant: the run must bind to the exact candidate identity.
 
-Common discrepancies between local and cloud environments:
-- Stale dependency caches on CI runners
-- Divergent toolchain versions or environment wrappers
-- Case-sensitive filesystem behavior differing from local machines
-- Missing pipeline secrets or incorrect permissions
-- Dependent service containers not yet ready
-- Network timeouts or API rate limits
-- Architecture-specific failures in multi-platform build matrixes
+## 6.9 Cloud runner issues
 
-Isolate failures systematically:
-1. Is this a candidate source defect?
-2. Is this a runner environment or tooling defect?
-3. Is this a CI pipeline configuration defect?
-4. Is this caused by stale runner cache?
-5. Is this an external upstream outage?
+Common failures:
 
-Never modify application source code to bypass unclassified infrastructure failures.
+- cache contains an old dependency;
+- wrapper/shim differs from local;
+- case-sensitive filesystem differs;
+- missing secret/permission;
+- service container is not ready;
+- network/rate limit;
+- only one platform in a matrix job fails.
 
-## 6.10 Main branch drift
-
-When the main branch advances between audit approval and integration execution:
+Handle by layer:
 
 ```text
-AUDITED CANDIDATE + PREVIOUS MAIN
-             |
-       BRANCH DRIFT
-             v
-   NEW CURRENT MAIN
+candidate bug?
+environment/tooling bug?
+CI config bug?
+stale cache?
+external outage?
 ```
 
-The Lead recomputes the integration candidate, merges or rebases against updated main, and re-executes verification gates. An audit log from an earlier base commit cannot validate the merged outcome.
+Do not “fix code” for an infrastructure failure before classification.
+
+## 6.10 Main drift
+
+If main changes between audit and integration:
+
+```text
+AUDITED CANDIDATE + OLD MAIN
+            X
+CURRENT MAIN differs
+```
+
+The Lead must recompute the merge candidate and run the appropriate gate. Do not use the old audit as evidence for the new combination.
 
 ## 6.11 Migration integration
 
-Pre-allocated resource slots prevent duplicate migration numbers, but semantic dependencies must still be validated. In database projects, migration N+1 may depend on tables created by migration N. In distributed systems, protocol schema R2 may depend on contracts established in R1. The dependency DAG must dictate merge ordering; unique filenames do not substitute for semantic sequence.
+Allocated resource slots prevent duplicate identifiers, but integration must still verify dependency semantics. In a DB project, migration N+1 may depend on schema created by migration N; in an event/proto/CLI project, resource R2 may depend on contract R1. The DAG must represent that dependency; distinct identifiers do not replace semantic ordering.
 
-## 6.12 Release promotion and deployment verification
+## 6.12 Promotion and release evidence
 
-Following final integration, record:
+After final integration, record:
 
 ```text
-Main branch commit SHA
-Included Work Package IDs
-Associated audit report references
-Global quality gate commands and exit codes
-CI pipeline run IDs
-Schema migration verification results
-Active waivers and documented limitations
-Unverified external deployment environments
+main/release SHA
+included WP IDs
+included audit IDs/reports
+global QA commands + exit codes
+CI run IDs
+migration/schema result
+known waivers
+unverified external environments
 ```
 
-Apply the `RELEASE_VERIFIED` status only after deployment-specific checks pass. Passing local test suites does not equate to verified production deployment.
+Use `RELEASE_VERIFIED` only when release-specific evidence exists. Local green status does not equal production verification.

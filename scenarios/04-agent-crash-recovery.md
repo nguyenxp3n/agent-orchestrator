@@ -1,27 +1,27 @@
-# Scenario: Agent Timeout or Crash Recovery
+# Scenario: Agent Crash / Recovery
 
 ## Trigger
-A coding worker process terminates, times out, or stops responding.
+Worker times out/crashes while the WP is RUNNING.
 
 ## Risk
-Lost work, lingering locks, or corrupted working trees.
+Risk of lost work, duplicate work, or resource leakage.
 
 ## Evidence
-Process timeout logs, absent progress reports, uncommitted workspace diffs.
+Workspace status/diff; last safe commit; leases; pending DRs.
 
 ## Immediate Action
-Freeze the worktree. Capture uncommitted diffs and last known commit SHA.
+Freeze workspace, capture Recovery Bundle, classify recoverability.
 
 ## Forbidden Response
-Never wipe the workspace immediately without preserving working diffs.
+Do not delete the worktree or immediately return resources to the pool.
 
 ## Recovery Procedure
-Construct a Recovery Bundle containing captured state. Increment `ASSIGNMENT_GENERATION`. Reassign to a fresh worker.
+Reassign the WP with a new generation and preserved safe state.
 
 ## Exit Criteria
-New worker completes the package; crashed worker's stale outputs are rejected.
+The new Worker continues from safe evidence; the old generation is invalid.
 
 ## Example Lead Response
 ```text
-Worker-2 timed out. Capturing diff in wt-wp210. Incrementing generation to 2. Dispatching fresh worker with Recovery Bundle.
+Agent-4 crashes at generation 2; Agent-7 receives generation 3 with the same allocated resource slot R2 for the WP.
 ```

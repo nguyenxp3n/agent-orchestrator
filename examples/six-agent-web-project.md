@@ -1,9 +1,11 @@
-# Example: Fullstack Web Project with 6 Agents
+# Example: Web Fullstack with 6 Agents
 
 ## Objective
-Deliver a feature set encompassing frozen contracts, authentication backend, review backend, review frontend views, deployment infrastructure, and CI pipelines without concurrent contention on shared hotspots.
 
-## Dependency DAG
+Implement a feature set covering contracts, auth/backend, review/backend, review/frontend, infra, and CI without allowing workers to modify the same hotspot concurrently.
+
+## DAG
+
 ```text
 WP-100 Contract Freeze
   +--> WP-210 Auth Backend --------+
@@ -13,27 +15,30 @@ WP-300 Infra ----------------------+
 WP-400 CI -------------------------+
 ```
 
-## Boundary and Resource Allocation
+## Allocation
+
 ```text
-Agent 1 (WP-210): services/auth/**, Migration Slot 000021
-Agent 2 (WP-220): internal/review/**, Migration Slot 000022
-Agent 3 (WP-230): apps/web/src/features/review/**
-Agent 4 (WP-300): deploy/**, zero database migrations
-Agent 5 (WP-400): .github/workflows/** only
-Agent 6 (Auditor): Read-only repository access + command execution
+A1 WP-210: services/auth/**, migration 000021
+A2 WP-220: internal/review/**, migration 000022
+A3 WP-230: apps/web/src/features/review/**
+A4 WP-300: deploy/**, no migration
+A5 WP-400: .github/workflows/** only
+A6 Auditor: read-only + command execution, no candidate edits
 ```
 
-Root application router and central build scripts are designated `INTEGRATION_ONLY`.
+The root router and Taskfile are `INTEGRATION_ONLY`.
 
 ## Dispatch Wave
-Following approval and freezing of WP-100 contracts, Agents 1 through 5 execute concurrently in isolated worktrees. The Auditor evaluates candidates as individual workers submit completion claims.
 
-## Sequential Integration
+After WP-100 is accepted/frozen, A1–A5 may run in parallel if resource checks pass. The Auditor processes candidates as each worker reports completion.
+
+## Integration
+
 ```text
 merge WP-210 -> global QA
 merge WP-220 -> global QA
-merge WP-230 + apply approved route registration -> global QA and E2E
-merge Infra and CI branches -> cloud pipeline verification
+merge WP-230 + approved route integration -> global QA/E2E
+merge Infra/CI according to dependency -> cloud CI verify
 ```
 
-If the frontend package omits required interface components, WP-230 is rejected even if backend endpoints pass all tests.
+If the frontend is missing an expected component even though the backend passes, WP-230 is not accepted.

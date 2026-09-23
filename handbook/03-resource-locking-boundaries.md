@@ -1,8 +1,8 @@
-# Chapter 3: Resource Governance, Boundaries, and Lock Allocation
+﻿# Chapter 3: Resource governance and conflict prevention
 
-## 3.1 Permission Envelope for Workers
+## 3.1 Permission Envelope for each Worker
 
-Every coding worker receives three explicit path groups:
+Each worker receives three path groups:
 
 ```yaml
 allowed_paths:
@@ -15,93 +15,149 @@ forbidden_paths:
   - .github/workflows/**
 ```
 
-- `allowed_paths`: Write, delete, and rename permissions strictly within the assigned package contract.
-- `readonly_paths`: Read-only access for reference and type validation.
-- `forbidden_paths`: Protected files that must not be modified. If modifications become necessary, submit a formal change request.
+- `allowed_paths`: write/delete/rename within the contract.
+- `readonly_paths`: readable but not writable.
+- `forbidden_paths`: do not touch; if access is required, create a request.
 
-Renaming or moving a file constitutes a deletion followed by a creation; both the source and target paths must reside within `allowed_paths`.
+A rename/move counts as delete + create, so both source and destination must be valid.
 
 ## 3.2 Ownership modes
 
-Agent Orchestrator defines explicit permission modes:
+AGENT-ORCHESTRATOR uses the following conceptual modes:
 
-- `EXCLUSIVE_WRITE`: Single active writer on the designated path.
-- `SHARED_READ`: Concurrent read access across all workers.
-- `INTEGRATION_ONLY`: Modifications reserved exclusively for the Integrator upon approved change requests.
-- `ALLOCATED_WRITE`: Restricted write access limited to pre-assigned identifiers (such as dedicated migration sequence numbers).
-- `APPEND_ONLY`: Sequential append operations under strict formatting rules without rewriting existing history.
-- `GENERATED`: Automated build outputs; workers must not manually edit these files.
+- `EXCLUSIVE_WRITE`: one active writer.
+- `SHARED_READ`: multiple readers.
+- `INTEGRATION_ONLY`: only the Integrator/an approved change request may modify it.
+- `ALLOCATED_WRITE`: only the allocated instance may write, for example a migration slot.
+- `APPEND_ONLY`: append according to rules; do not rewrite history.
+- `GENERATED`: generated file; workers do not edit it directly.
 
-These controls do not require automated lock daemon software; the Lead enforces them through the Ownership Matrix and operational audit logs.
+A runtime lock manager is not required to apply these modes. The Lead may manage them with an Ownership Matrix + ledger as long as allocation is explicit and auditable.
 
-## 3.3 Semantic Resources beyond directory paths
+## 3.3 Semantic Resources can matter more than paths
 
-Collisions frequently occur even when file paths do not overlap:
-- Two workers create migrations modifying the same database table.
-- Two services claim the same network port.
-- Two endpoints register overlapping URL route patterns.
-- Two workers assign conflicting semantics to the same environment variable.
-- Two consumers publish conflicting payload schemas to the same event topic.
+Collisions may occur even when paths do not overlap: two migrations target the same table; two services use the same port; two modules claim the same route; two workers assign different meanings to the same env var; two consumers use the same event name with different schemas.
 
-Maintain an explicit Resource Registry:
+The Resource Registry should include:
 
 ```text
 resource_id | type | owner_wp | mode | value/slot | status | notes
 ```
 
-## 3.4 Allocation of sequential identifiers
+## 3.4 Migration Slots
 
-Database migrations and sequence numbers represent classic `ALLOCATED_WRITE` resources. The Lead assigns sequence slots prior to dispatch:
+Migrations are a common example of `ALLOCATED_WRITE`. The Lead allocates slots before dispatch:
 
 ```text
-Slot R1 -> WP-A / Worker 1
-Slot R2 -> WP-B / Worker 2
-Slot R3 -> WP-C / Worker 3
-Slot R4 -> WP-D / Worker 4
+R1 -> WP-A / Agent 1
+R2 -> WP-B / Agent 2
+R3 -> WP-C / Agent 3
+R4 -> WP-D / Agent 4
 ```
 
-Workers must never determine sequence numbers by scanning local directory listings, as parallel branches will inspect identical baselines and select conflicting numbers.
+A Worker must not â€œtake the next numberâ€ by inspecting the directory, because parallel branches may independently choose the same number.
 
 ```text
-Worker boundary constraint:
 You own allocated resource slot R2 only.
-Do not assign R1, R3, R4 or generate additional shared identifiers.
-If additional shared resources become necessary, halt and file a RESOURCE_REQUEST.
+Do not allocate R1, R3, R4 or create an additional shared identifier.
+If another shared resource becomes necessary, stop and send RESOURCE_REQUEST.
 ```
 
-## 3.5 Network ports, environment variables, routes, and message queues
+## 3.5 Port, env, route, and queue allocation
 
 ```text
-PORT-API-DEV      -> 8081 -> Assigned to WP/API
-PORT-RUNNER-DEV   -> 8092 -> Assigned to WP/RUNNER
-ENV-REVIEW-KEY    -> Reserved by architecture decision; immutable
-ROUTE-/review/*   -> Owned by WP-CONTRACT specification
-QUEUE-ai.jobs     -> Event schema owned by core messaging contract
+PORT-API-DEV      -> 8081 -> WP/API
+PORT-RUNNER-DEV   -> 8092 -> WP/RUNNER
+ENV-REVIEW-KEY    -> reserved by security decision, not reusable
+ROUTE-/review/*   -> contract owner WP-CONTRACT
+QUEUE-ai.jobs     -> event contract owner
 ```
 
-Never store actual secret values in the Resource Registry. Record the secret identifier, owner, and access policy; values reside in secure secret managers or protected runtime environments.
+Do not copy secret values into the Resource Registry; record only the name/owner/policy. The value remains in the secret manager or controlled environment.
 
-## 3.6 Managing shared integration hotspots
+## 3.6 Integration Hotspots
 
-Certain centralized files require updates from multiple features: application entrypoints (`main.go`, `index.ts`), dependency injection containers, root router manifests, `Taskfile.yml`, central build manifests, and shared CI pipelines.
+Files that many workers often want to modify include: root router, application bootstrap, central DI, `Taskfile.yml`, root package manifest, global schema registry, shared CI workflow.
 
-Designate these files as `INTEGRATION_ONLY` during parallel execution waves. Workers submit structured Integration Requests upon completing their domain work:
+Mark them `INTEGRATION_ONLY` when multiple WPs run in parallel. The Worker submits an Integration Request:
 
 ```text
-Request: Register /review endpoints
+Request: register /review routes
 Candidate artifact: <owned-domain-path>/<candidate-artifact>
-Target hotspot: services/api/router.go
-Rationale: Accepted package requires public route registration
-Verification: Full repository test suite + route contract tests
+Desired hotspot: services/api/router.go
+Reason: accepted WP requires registration
+Verification: repository global tests + route contract test
 ```
 
-The Integrator applies approved registrations sequentially during integration, eliminating merge conflicts and keeping worker write boundaries narrow.
+The Integrator applies the change after audit, reducing merge conflicts and broad ownership.
 
-## 3.7 Early boundary enforcement
+## 3.7 Block conflicts early
 
-When a worker requests edits outside its assigned envelope:
+When an agent requests an out-of-scope change:
 
-1. Validate whether the requested file or resource is truly required to satisfy acceptance criteria.
-2. Inspect the Ownership Matrix and DAG to identify the current owner.
-3. Guide the worker toward in-scope alternatives (such as dependency injection or interface abstraction).
-4. If an external change is unavoidable, stop execution and file a formal Decision Request or Scope Expansion Request.
+1. Determine whether the file/resource is actually required for acceptance.
+2. Check ownership/DAG to identify the current owner.
+3. Find an in-scope solution.
+4. If none exists, choose a constrained scope extension, Integration Request, ownership transfer, new resource allocation, or new WP.
+5. Record the decision.
+
+```text
+Do not grant write access to migrations/** or services/api/** for WP-INFRA.
+Both regions belong to other WPs and Migration Slots are already allocated.
+Keep the solution within deploy/** and services/runner-worker/**.
+If the health-check requires API wiring, submit an Integration Request; do not modify the hotspot directly.
+```
+
+This general pattern prevents an Infrastructure/Platform Worker from opportunistically changing a shared schema, root registration, or domain resource.
+
+## 3.8 Controlled scope extension
+
+Some requests are valid. If a Worker must modify shared build/task configuration to expose a deliverable, the Lead opens only the exact file/resource required and adds an invariant:
+
+```text
+Granted: <shared-build-or-task-config>
+Conditions:
+- preserve all existing commands/tasks
+- project quality gate must remain green
+- contract/spec validation must remain green when applicable
+- no unrelated refactor
+```
+
+A good scope extension is small, explicit, reversible, and subject to additional verification.
+
+## 3.9 Security boundary
+
+Resource reuse can create a security defect. If an agent asks to reuse a deletion HMAC key for content review, the Lead must reject it because the two security domains are different.
+
+```text
+Reuse secret across domains? -> reject by default
+Weaken fail-closed behavior?  -> escalate
+Broaden privilege?            -> prefer narrower design
+```
+
+## 3.10 Lease transfer and crash handling
+
+A resource belongs to the WP and does not necessarily belong to the process/agent:
+
+```text
+WP-B owns resource slot R2
+Agent-4 generation 2 crashes
+Agent-7 generation 3 resumes WP-B
+R2 remains WP-B's slot
+Agent-4 generation 2 returning later is stale
+```
+
+Do not recycle a migration identifier merely because the previous agent disappeared.
+
+## 3.11 Boundary Audit
+
+```bash
+git diff --name-status <base>...HEAD
+git status --short
+```
+
+Compare changed paths against allowed/readonly/forbidden scope. Then inspect semantic diff: routes, migration identifiers, DB objects, env vars, ports. Filename-only inspection is insufficient.
+
+## 3.12 Chapter operating principle
+
+Safe parallelism depends on **explicit ownership + preallocated resources + isolation + post-work audit**. As agent count increases, the Lead must narrow boundaries and move shared hotspots out of worker branches whenever possible.

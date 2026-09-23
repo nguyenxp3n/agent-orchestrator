@@ -1,12 +1,24 @@
-# Playbook: Scope Expansion Request
+# Playbook: Scope Expansion
 
 ## Trigger
-A worker discovers that completing its assigned task requires modifying files outside `ALLOWED_PATHS`.
+Worker needs to modify a path/resource outside the WP to satisfy acceptance.
 
-## Procedure
-1. **Explore in-scope alternatives**: Check whether the requirement can be satisfied using dependency injection, local configuration, or interface abstractions.
-2. **File formal request**: If modification is unavoidable, the worker submits an explicit Scope Expansion Request detailing:
-   - Target file paths requested
-   - Technical justification
-   - Invariant impact analysis
-3. **Evaluate and rule**: The Lead inspects the Ownership Matrix. If the path is unowned, the Lead updates the package contract. If the path belongs to another active worker, the request is rejected and deferred to an Integration Request.
+## Decision Procedure
+1. Prove the change is mandatory, not merely convenient.
+2. Check the Ownership Matrix and active workers.
+3. Find an in-scope solution or Integration Request first.
+4. If scope must expand, grant the exact path/resource, not a broad wildcard.
+5. Record invariants and additional verification.
+
+```text
+GRANT: Taskfile.yml only
+PRESERVE: all existing tasks
+VERIFY: task qa + task spec:validate
+NO unrelated refactor
+```
+
+## Reject When
+Reject when the scope belongs to another WP, a shared hotspot is active, the worker wants to self-allocate a migration/port, or the change violates a frozen contract.
+
+## Exit Criteria
+A decision record exists; ownership/resource matrix is updated; affected workers/context are refreshed; audit is aware of the new scope.

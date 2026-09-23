@@ -1,8 +1,25 @@
-# Template: Code Ownership Matrix
+# Template: Ownership Matrix
 
-| WP_ID | Owner Role | Allowed Paths (Write/Delete) | Read-Only Paths | Integration-Only Hotspots | Assigned Resources |
+## Rules
+
+Every active write region/resource must have a clear owner. Two `EXCLUSIVE_WRITE` scopes must not overlap. Prefer `INTEGRATION_ONLY` for shared hotspots.
+
+| WP | Path/Pattern | Mode | Resource/Contract | Owner | Notes |
 |---|---|---|---|---|---|
-| WP-100 | Architect | `packages/contracts/**` | `docs/**` | None | Frozen API schemas |
-| WP-210 | Worker-1 | `services/auth/**` | `packages/contracts/**` | `services/api/router.go` | Migration Slot R1 |
-| WP-220 | Worker-2 | `apps/web/src/features/auth/**`| `packages/contracts/**` | `apps/web/src/routes.tsx` | Route namespace `/auth` |
-| WP-300 | Worker-3 | `deploy/**`, `infra/**` | `services/**` | Root docker-compose | Ports 8080, 5432 |
+| | | EXCLUSIVE_WRITE | | | |
+| | | SHARED_READ | | | |
+| | | INTEGRATION_ONLY | | | |
+| | | ALLOCATED_WRITE | | | |
+
+## Collision Review
+
+```text
+Path overlaps found:
+Semantic overlaps found:
+Resolution:
+DAG/contract changes required:
+```
+
+## Change Control
+
+Every ownership transfer or scope extension must have a DR/record, effective generation, and verification impact. Do not silently modify the matrix after a worker has started.

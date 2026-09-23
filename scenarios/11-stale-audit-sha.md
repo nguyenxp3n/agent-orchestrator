@@ -1,27 +1,27 @@
-# Scenario: Candidate Commit Differs From Audited Commit
+# Scenario: Stale Audit SHA
 
 ## Trigger
-A worker pushes an additional commit to its branch after an audit has been completed.
+The candidate receives a new commit after audit.
 
 ## Risk
-Merging uninspected, unverified code into main.
+The acceptance attestation no longer proves the current code.
 
 ## Evidence
-Branch HEAD commit SHA differs from the candidate commit SHA recorded in the audit report.
+Audit candidate SHA; current HEAD.
 
 ## Immediate Action
-Block merge. Transition status from `ACCEPTED` to `STALE_AUDIT_SHA`.
+Invalidate direct acceptance for new SHA; inspect delta/re-audit.
 
 ## Forbidden Response
-Never assume a minor post-audit commit is safe without inspection.
+Do not treat “docs only” as automatically safe when documentation is an acceptance output.
 
 ## Recovery Procedure
-Review the diff between the audited commit and branch HEAD. Re-execute test commands and issue a fresh audit report.
+Re-audit appropriate scope and issue fresh disposition.
 
 ## Exit Criteria
-The exact commit SHA present at branch HEAD holds a verified, passing audit report.
+Accepted identity equals current candidate.
 
 ## Example Lead Response
 ```text
-Candidate SHA mismatch. Audited commit was a1b2c3d; branch HEAD is e4f5g6h. Re-executing forensic audit against e4f5g6h.
+Audited abc123, worker pushes def456: report STALE_AUDIT_SHA.
 ```

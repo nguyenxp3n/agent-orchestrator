@@ -1,27 +1,27 @@
 # Scenario: Path Ownership Collision
 
 ## Trigger
-Two active workers attempt to edit the same file path concurrently.
+Two WPs require write access to the same exclusive path/hotspot.
 
 ## Risk
-Merge conflicts, overwritten work, or race conditions.
+Overwrite, merge conflict, ownership ambiguity.
 
 ## Evidence
-Ownership Matrix showing overlapping write boundaries in active worktrees.
+Exact allowed paths; planned edits; repository hotspot list.
 
 ## Immediate Action
-Halt execution on the colliding package. Reassign path ownership or serialize execution.
+Reject the parallel plan; split the hotspot into an Integration Request or serialize/transfer ownership.
 
 ## Forbidden Response
-Never advise workers to "resolve it manually later during merge."
+Do not use “be careful not to edit the same lines” as the primary control mechanism.
 
 ## Recovery Procedure
-Reconstruct boundaries. Reassign the disputed path to one worker, mark it read-only for the other, and recompile task prompts.
+Recompile WP boundaries and workspaces.
 
 ## Exit Criteria
-Disputed path is owned exclusively by one worker; dependent worker receives the frozen contract.
+Only one active writer owns the region; the new plan has a clear audit boundary.
 
 ## Example Lead Response
 ```text
-Halt WP-B. Path `services/api/router.go` belongs to WP-A. WP-B will receive this dependency via Integration Request.
+Collision at services/api/router.go: mark the file INTEGRATION_ONLY and have workers output route modules only.
 ```

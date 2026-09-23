@@ -1,27 +1,27 @@
-# Scenario: Duplicate or Redundant Worker Reports
+# Scenario: Duplicate / Stale Agent Message
 
 ## Trigger
-A worker submits multiple conflicting completion claims for the same task.
+Agent/harness sends a completion/decision message again.
 
 ## Risk
-Processing duplicate reports or evaluating stale candidate commits.
+Double transition, duplicate merge/resource allocation.
 
 ## Evidence
-Multiple completion messages with identical or differing commit SHAs.
+Message/task/generation identity; current canonical state.
 
 ## Immediate Action
-Inspect the assignment generation counter. Process only the message matching the active generation.
+Ignore duplicate idempotently; reject stale generation.
 
 ## Forbidden Response
-Never process multiple reports simultaneously or evaluate unverified commits.
+Do not advance state twice because the same report arrives twice.
 
 ## Recovery Procedure
-Verify branch HEAD on disk. Bind audit evaluation strictly to the current commit SHA.
+If payload differs under same identity, flag integrity issue/Safe Mode as needed.
 
 ## Exit Criteria
-Single audit executed against the verified branch HEAD commit SHA.
+One canonical transition per logical message.
 
 ## Example Lead Response
 ```text
-Duplicate completion report received. Discarding duplicate. Auditing active branch HEAD (commit a1b2c3d, Generation 1).
+A replayed Completion Report does not create a second ACCEPTED/integration action.
 ```

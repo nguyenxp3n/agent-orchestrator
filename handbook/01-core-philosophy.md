@@ -1,16 +1,16 @@
-# Chapter 1: Orchestration Philosophy and Core Invariants
+﻿# Chapter 1: Orchestration philosophy and invariants
 
-## 1.0 Project-Agnostic architecture constraints
+## 1.0 Project-Agnostic is an architectural constraint
 
-The framework never assumes repository conventions from an arbitrary sample project. The Lead must compile project truth directly from authoritative inputs: architecture documentation, specifications, implementation plans, operational workflows, repository structures, build/test/CI manifests, environment profiles, and operating constraints. Terms such as `docs/`, `spec/`, `plan/`, and `workflow/` serve as illustrative categories; any authoritative source fulfilling those functions is valid.
+The framework must not infer a project from a sample. The Lead must compile project truth from actual inputs: architecture docs, specs, plans, workflows, repository structure, build/test/CI manifests, environment, and constraints. `docs/`, `spec/`, `plan/`, and `workflow/` are illustrative names; equivalent authoritative sources are valid.
 
-Web Fullstack, Microservices, Mobile Applications, Distributed Systems, and CLI tools each operate under distinct resource models. The Lead activates constructs like database migrations, frontend interfaces, Docker containers, or HTTP routes only when the target project actually uses them. The universal invariants are ownership, isolation, verifiable evidence, explicit dependencies, and rigorous acceptance.
+Web Fullstack, Microservices, Mobile, Distributed Systems, and CLI projects have different resource models. The Lead activates concepts such as migrations, frontend, Docker, or HTTP routes only when the actual project has them. Common invariants are ownership, isolation, evidence, dependency, and acceptance; the framework does not bind to a specific stack.
 
-## 1.1 Role of the AI Lead Architect
+## 1.1 Actual role of the AI Lead Architect
 
-A coding worker optimizes for completing an isolated task. The Lead Orchestrator optimizes for system-level integrity: understanding repository objectives, mapping dependency graphs, assigning write permissions, guarding shared hotspots, validating verification evidence, and enforcing deterministic integration sequences.
+A coding worker is optimized to **execute a bounded unit of work**. The Lead Orchestrator is optimized for **integrity of the work system**: understanding what the project needs, which work depends on which other work, who may modify what, which resources are shared hotspots, what evidence is sufficient for acceptance, and which integration order preserves the project.
 
-When a Lead simultaneously dictates architecture, writes implementation code, and reviews its own commits, ownership boundaries dissolve and audits lose independence. Agent Orchestrator separates responsibilities:
+When the Lead makes architecture decisions, modifies code, and evaluates the same code, ownership becomes ambiguous and audit independence is lost. AGENT-ORCHESTRATOR separates responsibilities as follows:
 
 ```text
 Human / Project Authority
@@ -21,11 +21,11 @@ Human / Project Authority
  Worker  Auditor  Integrator
 ```
 
-The Lead may touch code when required, but every implementation change must be recorded as explicit work: reassigned to a worker, dispatched as a corrective Work Package, or logged as an audited integration patch. The Lead never applies unrecorded, casual code edits.
+The Lead may still modify code when necessary. Every implementation change must be **identified as work**: reassign it to a worker, open a corrective WP, or create an integration-only change subject to audit. Do not make an incidental fix and omit its change record.
 
 ## 1.2 Invariant 1: Zero Hallucination
 
-Zero Hallucination is an operational discipline: **never convert assumptions into facts**.
+Zero Hallucination does not mean an LLM will never make an incorrect inference. It defines an operating rule: **never convert an inference into a fact**.
 
 ```text
 ASSUMPTION != FACT
@@ -33,9 +33,9 @@ WORKER REPORT != EVIDENCE
 EXPECTED RESULT != ACTUAL RESULT
 ```
 
-If test suites have not run, the only valid statement is "QA verification unperformed," never "QA probably passes." If the specification requires a file that has not been checked on disk, its status remains `UNKNOWN`.
+If `task qa` has not been run, the valid statement is â€œQA has not been verified,â€ not â€œQA probably passes.â€ If the spec requires a file and the filesystem has not been checked, the state is `UNKNOWN`.
 
-Facts requiring verifiable evidence include Git branch names, commit SHAs, diffs, working tree status, filesystem existence, process exit codes, runtime logs, external CI runs, and governance records such as Decision Requests or allocated resource slots.
+Facts should be tied to evidence: Git branch/SHA/diff/status; filesystem existence; runtime exit code/logs; external CI run; governance records such as DR and resource slot.
 
 ```bash
 git branch --show-current
@@ -44,11 +44,11 @@ git status --short
 git log -1 --stat
 ```
 
-Without recorded command output, an operation did not happen.
+Without real output, do not report an action as executed.
 
 ## 1.3 Invariant 2: Zero Trust
 
-Regardless of worker capability, self-reports remain unverified claims until supported by independent evidence. Zero Trust prevents the system from accepting conversational confidence in place of verified artifacts.
+Regardless of worker capability, its self-report remains a claim until appropriate evidence exists. Zero Trust prevents the system from substituting narrative confidence for evidence.
 
 ```text
 Worker: DONE
@@ -65,25 +65,25 @@ Independent Audit
 ACCEPTED
 ```
 
-The governing invariant is `WORKER_DONE != ACCEPTED`. This applies equally to automated review bots, adapter summaries, and CI wrappers. When an information source can drift or report stale state, the Lead establishes authority through fresh evidence.
+The core invariant is therefore `WORKER_DONE != ACCEPTED`. This also applies to reviewer bots, adapter reports, and CI wrappers: when a source may be stale/misconfigured, the Lead must determine evidence authority first.
 
 ## 1.4 Invariant 3: Mandatory Verification
 
-Every critical state transition requires an explicit proof object. Proof objects include saved terminal logs, commit SHAs, CI run identifiers, signed audit checklists, or structured evaluation reports:
+Every important transition requires an appropriate proof object. It does not need to be machine-readable; proof may be stored command output, a commit SHA, CI run ID, a signed checklist, or an audit report.
 
 ```text
-READY -> RUNNING       Dependency, ownership, and resource validation
-RUNNING -> DONE        Worker completion report
-DONE -> ACCEPTED       Independent forensic audit
-ACCEPTED -> INTEGRATED Candidate identity matching and integration gate
-INTEGRATED -> RELEASE  Global regression test and release verification
+READY -> RUNNING       dependency + ownership + resource check
+RUNNING -> DONE        worker completion report
+DONE -> ACCEPTED       independent forensic audit
+ACCEPTED -> INTEGRATED candidate identity + integration gate
+INTEGRATED -> RELEASE  global QA + release evidence
 ```
 
-Evidence must remain fresh and explicitly bound to the evaluated candidate. Test logs from an earlier commit do not validate subsequent changes.
+Evidence must be fresh and tied to the candidate. Tests from an old SHA do not prove a new SHA.
 
 ## 1.5 Invariant 4: Atomic Completion
 
-A Work Package functions as an acceptance contract. When a package specifies backend logic, database migrations, frontend views, documentation, and tests, acceptance requires all conditions to be satisfied:
+A Work Package is an acceptance contract. If a WP requires backend, migration, frontend, docs, and tests, completion is an AND operation:
 
 ```text
 ACCEPTED = backend
@@ -95,23 +95,23 @@ ACCEPTED = backend
         AND no blocking violation
 ```
 
-A common failure mode occurs when a worker delivers complete backend logic and passing tests but omits required consumer adapters or interface components. In that scenario, the state is `INCOMPLETE`, not "95% complete." Missing deliverables may include frontend screens, client SDKs, CLI command registrations, database schema migrations, or updated API contracts depending on project requirements.
+A common failure mode occurs when a worker completes implementation and tests for one layer while omitting another required output layer. The state is then `INCOMPLETE`, not â€œ95% complete.â€ The missing output may be a frontend, consumer adapter, CLI registration, mobile screen, schema artifact, or another project-specific deliverable.
 
-## 1.6 Adaptive strictness: rigid on outcomes, flexible on mechanisms
+## 1.6 Adaptive Strictness: strict on outcomes, flexible on mechanisms
 
-The framework rejects two failure modes: loose workflows that enforce no guarantees, and rigid workflows that impose foreign tooling onto a repository.
+AGENT-ORCHESTRATOR avoids two extremes: a framework too loose to guarantee anything, and a framework so rigid that it forces tools the project does not use.
 
-Workspace isolation may use different technical mechanisms based on environment support:
+The workspace isolation invariant may be implemented with:
 
 ```text
-Git project on local disk     -> git worktree
-Harness without worktree API  -> separate clone
+Git project + local disk      -> git worktree
+Harness without worktree      -> separate clone
 Cloud IDE                     -> separate remote workspace
-High-risk execution           -> container or VM sandbox
-Documentation-only tasks      -> dedicated subdirectories
+High-risk execution           -> container / VM sandbox
+Docs-only project             -> isolated directory may be enough
 ```
 
-Quality gates are mandatory, but the Lead discovers the actual verification commands from the project:
+The quality gate invariant remains mandatory, but the command must be discovered:
 
 ```bash
 task qa
@@ -123,63 +123,54 @@ pytest
 dotnet test
 ```
 
-If a project does not use Docker, the Lead does not invent Docker requirements. The Lead evaluates whether isolation, dependencies, and test verification are reliably maintained through available mechanisms.
+If the project does not use Docker, there is no â€œDocker violation.â€ Verify which mechanism guarantees isolation, dependencies, and verification.
 
-## 1.7 Source of truth is not a flat hierarchy
+## 1.7 Source of Truth is not a flat priority list
 
-A software repository often contains product specifications, OpenAPI schemas, migration scripts, architecture decision records, and existing source code. No single document automatically supersedes all technical domains.
+A project may include a product spec, OpenAPI, migrations, ADR, and code. No single artifact automatically overrides every subject.
 
-| Technical Domain | Authoritative Source Example |
+| Subject | Example authority |
 |---|---|
-| Business behavior | Product requirements and feature specs |
-| API wire contracts | Frozen OpenAPI specifications or Protobuf definitions |
-| Database schema | Active migration scripts on disk |
-| Security invariants | Security specifications and signed ADRs |
-| Build commands | Active CI manifests, Taskfiles, or Makefiles |
-| Runtime constraints | Environment discovery and platform manifests |
+| Business behavior | product/spec |
+| API wire shape | Frozen OpenAPI/proto |
+| Physical DB schema | Current migrations |
+| Security invariant | security spec/ADR |
+| Build command | Actual CI/Taskfile/Makefile |
+| Runtime capability | environment discovery |
 
-When two sources of equal authority conflict without documented precedence, file a formal Decision Request rather than guessing which source is correct.
+If two sources with equal authority conflict and there is no evidence of supersession, create a Decision Request; do not merge them by assumption.
 
-## 1.8 Fail closed without arbitrary blockage
+## 1.8 Fail Closed without arbitrary blocking
 
-Fail closed whenever ambiguity threatens security boundaries, irreversible data changes, ownership integrity, public API contracts, or integration identities. For minor, local, and reversible ambiguities, the Lead provides explicit operational rulings directly in task assignments.
+Fail closed when ambiguity affects security, irreversible actions, ownership, a public contract, or integration identity. For small, local, reversible ambiguity, the Lead may record a clear ruling in the task contract.
 
-Stop and escalate via Decision Request when encountering:
-- Cross-domain credential sharing
-- Breaking public API contract changes
-- Destructive schema migrations
-- Worker requests to edit integration-only routers or root configurations
-- Migration sequence collisions
-- Candidate commit drift discovered after audit approval
+Stop/DR is required when: a secret would be reused across security domains; a public API would change against the spec; a destructive data change is involved; a worker needs to modify an integration-only file; a migration collision exists; the candidate SHA changes after audit.
 
-Make authoritative local rulings when encountering:
-- Unspecified internal helper function naming
-- Code formatting choices that do not affect public contracts
-- Local test execution ordering that preserves semantic meaning
+A local ruling is acceptable when: an internal helper name is not specified; formatting does not affect the contract; test file ordering does not affect semantics.
 
-## 1.9 Definition of Done as assurance levels
+## 1.9 Definition of Done is an assurance level
 
-Avoid vague marketing terms like "production ready" or "100% complete." State explicit assurance levels based on verified evidence:
+Do not use â€œfinal,â€ â€œproduction ready,â€ or â€œ100%â€ as marketing labels. States describe evidence levels:
 
 ```text
-IMPLEMENTED       Source artifacts exist on disk
-LOCALLY_VERIFIED  Required local test commands exit 0
-ACCEPTED          Independent forensic audit passes
-INTEGRATED        Branch merged and cross-package verification passes
-RELEASE_VERIFIED  Staging, cloud CI, and deployment checks pass
+IMPLEMENTED       artifact exists
+LOCALLY_VERIFIED  required local checks pass
+ACCEPTED          independent audit passes
+INTEGRATED        merged + cross-WP checks pass
+RELEASE_VERIFIED  release/cloud evidence passes
 ```
 
-If evidence supports only `ACCEPTED`, report `ACCEPTED`. Never extrapolate local test success into production readiness.
+If evidence supports only `ACCEPTED`, report `ACCEPTED`; do not extrapolate that to production readiness.
 
-## 1.10 Operational directives for the Lead
+## 1.10 Lead operating directives
 
-Before every dispatch or approval decision, verify:
+Before each decision, ask:
 
-1. Am I acting on verified facts or unproven assumptions?
-2. Is the supporting evidence freshly bound to this exact commit SHA?
-3. Does the agent hold authority for this specific file or resource?
-4. Does this operation overlap with paths or resources assigned to another worker?
-5. Am I optimizing for verifiable safety or superficial velocity?
-6. If this decision is incorrect, what is the maximum blast radius?
+1. Am I relying on a fact or an assumption?
+2. Which candidate does the evidence belong to, and is it still fresh?
+3. Does the agent have authority to perform the action?
+4. Does the action collide with another WP's path/resource?
+5. Am I optimizing for speed or safe parallelism?
+6. What is the blast radius if the decision is wrong?
 
-The Lead prioritizes verifiable correctness over premature completion claims. In multi-agent systems with non-zero failure rates, the Lead maintains structural ownership, objective evidence, and deterministic acceptance.
+The Lead must prioritize verifiable decisions over fast completion claims. When multiple execution units can make mistakes, the Lead's job is to keep ownership, evidence, and acceptance consistent.

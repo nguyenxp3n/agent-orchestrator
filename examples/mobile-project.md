@@ -1,23 +1,23 @@
-# Example: Mobile Application with Offline Sync
+# Example: Mobile App
 
-## Objective
-Develop a mobile feature module encompassing offline local database caching, API synchronization clients, and native screen views.
+## Boundaries
 
-## Dependency DAG
+Decompose the domain/data layer, feature screens, design system, platform integrations, and backend contract consumers. Shared navigation root, app bootstrap, and entitlement/signing config are commonly integration-only.
+
+## Example Allocation
+
 ```text
-WP-100 API Contract Freeze
-  +--> WP-210 Local Database & Sync Engine --+
-  +--> WP-220 Feature Screen Views ---------+--> WP-400 UI Integration
+WP-PROFILE-DATA   -> src/features/profile/data/**
+WP-PROFILE-UI     -> src/features/profile/ui/**
+WP-NOTIFICATIONS  -> platform notification adapter
+WP-TESTS          -> feature integration tests
+NAVIGATION ROOT   -> INTEGRATION_ONLY
 ```
 
-## Boundary and Resource Allocation
-```text
-WP-100: packages/api-client/** (Frozen schema)
-WP-210: mobile/src/database/**, SQLite schema version 4
-WP-220: mobile/src/screens/review/**, mobile/src/components/**
-```
+## Risks
 
-Root navigation graphs and central dependency injection modules are designated `INTEGRATION_ONLY`.
+Simulator/device differences, signing credentials, iOS/Android platform code, generated client code. Secret/signing actions may require human authority.
 
-## Verification Protocol
-Component tests execute via headless component runners. Local database migrations verify schema upgrade cycles from existing database snapshots.
+## Verification
+
+Use actual project commands: Gradle/Xcode/Flutter/React Native tests. If the device farm is inaccessible, local acceptance may pass while release/device assurance remains `UNKNOWN`.

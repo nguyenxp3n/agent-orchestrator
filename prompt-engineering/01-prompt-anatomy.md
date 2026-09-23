@@ -1,24 +1,24 @@
-# 01: Prompt Anatomy: From 5-Part Prompts to Agent Execution Contracts
+﻿# 01: Prompt Anatomy: from the 5-part Prompt to the Agent Execution Contract
 
-## 1. Baseline prompt formula
+## 1. Base formula
 
-A routine task prompt often begins with five standard components:
+A general prompt can start with five components:
 
 ```text
 ROLE + CONTEXT + TASK + FORMAT + CONSTRAINTS
 ```
 
-- Role: The persona and operational scope assigned to the agent.
-- Context: Background information required to interpret the task.
-- Task: The deliverable output the agent must produce.
-- Format: The expected structure of the return payload.
-- Constraints: Boundaries that must not be violated.
+- Role: what role the agent performs and how much authority it has.
+- Context: the background facts required to understand the task.
+- Task: the result that must be produced.
+- Format: the required output shape.
+- Constraints: boundaries that must not be crossed.
 
-This formula works for small, self-contained tasks. In multi-agent software engineering, however, it fails to prevent scope drift, false completion claims, and resource collisions.
+This formula works for short tasks. For coding agents or multi-agent orchestration, it is insufficient to prevent scope drift, false completion, and resource collisions.
 
-## 2. Agent-grade execution contract
+## 2. Agent-grade contract
 
-Agent Orchestrator expands the baseline formula into an enforceable execution contract:
+AGENT-ORCHESTRATOR extends it to:
 
 ```text
 ROLE
@@ -38,84 +38,89 @@ ROLE
 
 ### Role
 
-A role must define **operational responsibilities and authority limits**, not decorative personas.
+Role must define **responsibility and authority boundaries**, not a decorative persona.
 
 Weak:
+
 ```text
-You are a brilliant senior full-stack developer.
+You are a skilled senior developer.
 ```
 
 Strong:
+
 ```text
-You are the Scoped Coding Worker for WP-210. You implement artifacts strictly within your assigned ownership envelope. You do not merge code, you do not expand scope, and you never mark tasks as ACCEPTED.
+You are the Scoped Coding Worker for WP-210. Implement only artifacts within the assigned ownership envelope; do not self-merge, expand scope, or self-declare ACCEPTED.
 ```
 
 ### Objective
 
-Define outcomes directly rather than describing generic activity:
+Describe an outcome, not vague activity.
 
 ```text
-OBJECTIVE: Implement an idempotent endpoint satisfying the frozen contract, accompanied by regression tests proving duplicate requests do not create duplicate database records.
+OBJECTIVE: create an idempotent endpoint that satisfies the frozen contract and includes a regression test proving that a duplicate request does not create a second record.
 ```
 
 ### Success Predicate
 
-The **Success Predicate** provides a verifiable boolean condition distinguishing genuine completion from conversational near-misses:
+A **Success Predicate** is a verifiable condition that distinguishes actual DONE from â€œlooks done.â€
 
 ```text
 SUCCESS_PREDICATE:
-- Expected deliverable files exist on disk
-- Contract test suite passes
-- Replay test for duplicate requests passes
-- Git diff strictly respects allowed_paths
-- No unallocated semantic resources are consumed
+- expected artifact exists;
+- contract tests pass;
+- duplicate replay test pass;
+- diff stays within allowed_paths;
+- no resource outside the allocation is used.
 ```
 
 ### Non-Counting Outcomes
 
-List plausible near-misses that workers frequently substitute for actual technical delivery:
+List common near misses that the agent might return instead of the required result.
 
 ```text
 NON_COUNTING_OUTCOMES:
-- Implementing backend logic while omitting required client integration artifacts
-- Passing unit tests while failing to run the repository quality gate
-- Describing a theoretical implementation instead of writing code files to disk
-- Claiming blockage by specifications that have already been resolved
-- Employing out-of-scope workarounds to force test suites to pass
+- only backend is implemented while the WP requires a client artifact;
+- unit tests pass but the canonical quality gate has not run;
+- a solution is described instead of producing the artifact;
+- â€œblocked by specâ€ is reported even though the spec is already resolved;
+- an out-of-ownership workaround is used to make tests green.
 ```
 
 ### Verification
 
-Verification requires recorded evidence:
+Verification must produce evidence:
 
 ```text
-command -> exit code -> artifact/log trace -> acceptance criterion
+command -> exit code -> artifact/log -> criterion
 ```
 
-Never accept conversational claims such as:
+Do not accept:
+
 ```text
-"I tested the implementation and verified that everything works properly."
+"I checked everything and it is fine."
 ```
 
-## 3. Heuristic prompt altitude
+## 3. Prompt altitude
 
-Prompts that are too low-level hard-code every keystroke, eliminating an agent's ability to navigate minor obstacles. Prompts that are too high-level invite unconstrained guessing.
+A prompt written at too low an altitude hard-codes every action and reduces agent adaptability. A prompt written too high is ambiguous.
 
-The framework enforces **heuristic altitude**:
-- Lock outcomes, invariants, path boundaries, and verification criteria rigidly.
-- Prescribe step-by-step procedures only at known risk junctures.
-- Leave internal implementation details to the worker within its permitted envelope.
+The framework uses an **altitude heuristic**:
 
-## 4. Positive directives first, prohibitions second
+- lock outcomes, invariants, boundaries, and evidence;
+- prescribe procedure only at risk-sensitive steps;
+- leave implementation details to the Worker within the allowed envelope.
 
-Prioritize clear instructions on **what the agent must accomplish**. Reserve negative constraints (`FORBIDDEN`, `DO NOT`) for critical boundaries: protected branches, secrets, destructive migrations, and out-of-scope files.
+## 4. Positive instructions first, prohibitions second
 
-## 5. Structural scaling
+Prefer instructions that state **what the agent must do**. Use `FORBIDDEN`/`DO NOT` for true invariants such as protected branches, secrets, destructive actions, and forbidden paths.
 
-- Small tasks: Concise Markdown headings suffice.
-- Complex tasks: Partition sections clearly: `OBJECTIVE`, `CONTEXT`, `BOUNDARIES`, `VERIFICATION`, and `OUTPUT CONTRACT`.
-- Multi-layered data: Structured Markdown or XML-style tags may be used for readability, though specific formatting syntax remains an implementation choice rather than an invariant.
+## 5. Structure by complexity
 
-## 6. Governing rule
+- Small task: short Markdown headers are sufficient.
+- Complex task: use clear sections such as `OBJECTIVE`, `CONTEXT`, `BOUNDARIES`, `VERIFICATION`, `OUTPUT`.
+- If multiple data layers can be confused, XML-like tags may be used, but this is a presentation choice, not an invariant.
 
-A prompt does not need to be long. A prompt must supply **sufficient signal so that an agent never guesses on decisions that alter system behavior**.
+## 6. Final rule
+
+The best prompt is not the longest prompt. It contains **enough signal that the agent does not need to guess decisions that can invalidate the result**.
+

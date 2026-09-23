@@ -1,11 +1,21 @@
 # Quick Reference: Toolchain Adaptation Matrix
 
-| Architecture Type | Canonical File Markers | Common Build Systems | Typical Quality Gates | Common Hotspots |
-|---|---|---|---|---|
-| **Go / Microservices** | `go.mod`, `go.sum` | `go build`, `make` | `go test -v ./...`, `golangci-lint` | `cmd/server/main.go`, proto schemas |
-| **Node.js / Fullstack** | `package.json`, lockfile | `pnpm`, `npm`, `yarn` | `pnpm lint`, `pnpm typecheck`, `pnpm test` | Root router, central `package.json` |
-| **Python / Fast-API** | `pyproject.toml`, `setup.py` | `poetry`, `uv`, `pip` | `ruff check`, `mypy .`, `pytest` | App entrypoint, Alembic migrations |
-| **Rust / Systems** | `Cargo.toml`, `Cargo.lock` | `cargo` | `cargo check`, `cargo clippy`, `cargo test` | `src/main.rs`, shared crates |
-| **Java / Kotlin** | `pom.xml`, `build.gradle` | `maven`, `gradle` | `mvn test`, `gradle test` | Application context, Flyway scripts |
+| Evidence need | Node/Web | Go | Python | Rust | .NET | Generic fallback |
+|---|---|---|---|---|---|---|
+| Install | npm/pnpm/yarn install | go mod download | pip/uv/poetry | cargo fetch/build | dotnet restore | project docs/CI |
+| Unit tests | npm/pnpm test | go test ./... | pytest | cargo test | dotnet test | discovered command |
+| Lint/type | eslint/biome/tsc | golangci-lint/go vet | ruff/mypy | clippy | analyzers | CI/task runner |
+| Global gate | npm script/task | Taskfile/Makefile | tox/nox/task | cargo + task | solution scripts | canonical CI command |
 
-The Lead discovers the actual toolchain from repository truth. Never force foreign tools onto an existing repository.
+## Isolation Matrix
+
+| Environment | Preferred | Fallback |
+|---|---|---|
+| Git local | worktree | separate clone |
+| Cloud IDE | workspace/branch | separate project workspace |
+| High-risk tools | container/VM | sandbox + serialized execution |
+| Low RAM | fewer concurrent agents | remote service/in-memory tests |
+
+## Rule
+
+Do not select a command solely from this table. The table is a heuristic. The Project Execution Profile derives authority from the actual repository/CI.

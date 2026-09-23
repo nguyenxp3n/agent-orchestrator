@@ -1,27 +1,27 @@
-# Scenario: Zombie Agent Returns After Reassignment
+# Scenario: Zombie Agent Returns
 
 ## Trigger
-A crashed or timed-out worker resumes execution and submits a completion report after a replacement worker has been dispatched.
+The previous Worker returns after the WP has been reassigned.
 
 ## Risk
-Overwriting valid recovery work with stale or corrupted state.
+Stale commits/messages may overwrite newer work.
 
 ## Evidence
-Incoming report generation counter is lower than active ledger generation.
+Assignment generation; message generation; current owner.
 
 ## Immediate Action
-Reject the submission immediately based on generation fencing.
+Reject stale generation output.
 
 ## Forbidden Response
-Never accept outputs from an expired generation simply because tests appear to pass.
+Do not merge because “the old agent completed more work.”
 
 ## Recovery Procedure
-Terminate the zombie worker process. Confirm active worker holds the current generation counter.
+If the artifact is useful, treat it as an external candidate and reconcile it through an explicit new task; do not overwrite canonical state.
 
 ## Exit Criteria
-Only outputs from the active generation counter enter the audit queue.
+Canonical WP state accepts only the current generation.
 
 ## Example Lead Response
 ```text
-Rejected submission from Worker-2 (Generation 1). Active generation is 2. Zombie output discarded.
+Generation 2 returns after generation 3: report STALE_GENERATION.
 ```

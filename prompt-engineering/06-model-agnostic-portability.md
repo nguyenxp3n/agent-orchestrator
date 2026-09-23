@@ -1,33 +1,71 @@
-# 06: Model-Agnostic Portability
+﻿# 06: Model-Agnostic & Harness-Agnostic Prompt Portability
 
-## 1. Universal behavioral standards
+## Principle
 
-Agent Orchestrator designs prompts to operate reliably across modern frontier models (Claude, OpenAI Codex, Google Gemini) and developer environments (Cursor, Windsurf, GitHub Copilot, custom agent harnesses).
+A canonical prompt describes **actions and outcomes**, not the vocabulary of a specific harness.
 
-To maintain portability, canonical prompt instructions describe **abstract actions and verifiable outcomes** rather than relying on vendor-specific tool names:
+Prefer:
 
 ```text
-Vendor-specific instructions (fragile):
-Use the Bash tool to run pytest. Then invoke the EditTool on handler.py.
-
-Model-agnostic instructions (portable):
-Execute the repository test command (`pytest`) in your workspace. Update `handler.py` to satisfy the interface contract.
+Open the relevant file.
+Search for the existing pattern.
+Run the project test command.
+Delegate a focused subtask if the environment supports subagents.
 ```
 
-## 2. Portable core and adaptive shell
+Do not turn these into invariants:
 
-Partition prompt architecture into two distinct layers:
+```text
+Use the Read tool.
+Use Bash.
+Use Task tool.
+Use TodoWrite.
+```
 
-1. **Portable Core**:
-   - Technical objectives and success predicates
-   - File boundaries (`allowed_paths`, `forbidden_paths`)
-   - Allocated resources and sequence slots
-   - Acceptance criteria and verification commands
-   - Output contract format
+Specific tool names appear only when the actual environment/project contract requires them.
 
-2. **Adaptive Shell**:
-   - Local tool invocation syntax (`run_command`, `edit_file`, `bash`)
-   - Platform-specific subagent delegation semantics
-   - Environment-specific path formatting (POSIX versus Windows)
+## Portable core, adaptive shell
 
-Keep the core standardized across all deployments, allowing the host harness to adapt execution syntax to the active environment.
+```text
+Portable Core:
+- role
+- objective
+- success predicate
+- boundaries
+- evidence contract
+- stop conditions
+
+Adaptive Shell:
+- subagent invocation syntax
+- tool names
+- model selector
+- permission frontmatter
+- workspace command
+- CI provider command
+```
+
+The Lead discovers the adaptive shell from the environment instead of hard-coding it into the framework.
+
+## Model differences
+
+Do not assume every model needs the same verbosity or reasoning cue. AGENT-ORCHESTRATOR does not require chain-of-thought, hidden reasoning tags, or a fixed â€œthink harderâ€ phrase.
+
+If the environment exposes a reasoning-effort control, treat it as an execution setting; the prompt still requires a success/evidence contract.
+
+## Structured sections
+
+Markdown headers are the portable default. XML-like tags may be used when instructions/context/examples/input need stronger separation, but they are optional.
+
+## Examples
+
+Few-shot examples are useful when steering format or edge cases. Use only canonical, diverse examples; do not load many redundant examples.
+
+## Portability test
+
+A canonical prompt is portable when replacing Claude Code with Codex/Cursor/Gemini/Copilot preserves:
+
+- the objective;
+- the boundaries;
+- the evidence bar;
+- only adapter/tool syntax changes.
+

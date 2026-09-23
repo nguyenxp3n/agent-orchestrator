@@ -11,25 +11,25 @@ DRAFT -> READY -> ASSIGNED -> RUNNING
                     |                    |
                     |                    +-> REWORK -> RUNNING
                     |                    +-> ACCEPTED -> INTEGRATING -> INTEGRATED
-                    +---------------------> FAILED/CANCELLED (Explicit ruling)
+                    +---------------------> FAILED/CANCELLED when explicitly decided
 ```
 
 ## Agent Runtime States
 
 ```text
-READY -> RUNNING -> SUSPECTED_STALLED -> PAUSED / FAILED / REASSIGNED
+READY -> RUNNING -> SUSPECTED_STALLED -> PAUSED/FAILED/REASSIGNED
 ```
 
-Agent runtime states and Work Package states are decoupled. A crashed worker leaves the Work Package recoverable.
+Agent state and WP state are not identical. A worker crash may leave the WP recoverable.
 
-## Assignment Generation Counter
+## Assignment Generation
 
-Every reassignment increments the generation counter (`ASSIGNMENT_GENERATION`). Submissions matching earlier generations are discarded as stale.
+Each reassignment increments generation. Messages/output from an old generation are stale.
 
-## Assurance Levels
+## Assurance Labels
 
 ```text
 IMPLEMENTED < LOCALLY_VERIFIED < ACCEPTED < INTEGRATED < RELEASE_VERIFIED
 ```
 
-Every level requires distinct verified evidence. Never escalate assurance levels through conversational claims.
+Each level requires its own evidence; do not advance assurance levels through wording alone.

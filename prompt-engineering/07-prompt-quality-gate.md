@@ -1,33 +1,63 @@
-# 07: The Prompt Quality Gate
+# 07: Prompt Quality Gate
 
-## 1. Purpose
+## Objective
 
-The Prompt Quality Gate is a pre-dispatch evaluation protocol. The Lead inspects compiled prompts against six critical dimensions to prevent dispatching incomplete, ambiguous, or dangerous instructions.
+Do not dispatch a prompt simply because it “reads well.” The gate checks structure and semantics before consuming agent time.
 
-## 2. Evaluation dimensions
+## Disposition
 
-1. **Objective clarity**: Is the success predicate boolean and verifiable?
-2. **Context hygiene**: Are context references minimal, authoritative, and free of bulk code dumps?
-3. **Boundary rigor**: Are `allowed_paths`, `readonly_paths`, and `forbidden_paths` explicitly declared?
-4. **Deliverable completeness**: Are all expected files, schemas, migrations, and documentation items enumerated?
-5. **Anti-near-miss protection**: Are non-counting outcomes defined to block superficial completion claims?
-6. **Verifiability**: Are exact test commands and expected exit codes specified?
+```text
+READY
+NOT_READY
+ESCALATE
+```
 
-## 3. Quality Gate evaluation matrix
+## Critical checks
 
-| Gate Check | Evaluation Criterion | Pass Condition |
-|---|---|---|
-| G-1: Objective | Success predicate is defined and measurable | Yes / No |
-| G-2: Boundaries | No path overlaps with active concurrent workers | Yes / No |
-| G-3: Resources | All sequence numbers, ports, and routes are pre-allocated | Yes / No |
-| G-4: Contracts | Prerequisite upstream interface contracts are frozen | Yes / No |
-| G-5: Verification | Commands are discovered from repository truth (no assumed tools) | Yes / No |
-| G-6: Escalation | Triggers for halting and filing Decision Requests are explicit | Yes / No |
+Any applicable item marked FAIL → `NOT_READY`:
 
-## 4. Gate disposition
+- [ ] Role has a clear authority boundary.
+- [ ] Objective is measurable/observable.
+- [ ] Success predicate distinguishes completion from a near miss.
+- [ ] Source-of-truth/inputs are identifiable.
+- [ ] Context is sufficient without significant unrelated bulk.
+- [ ] Scope/ownership is clear.
+- [ ] Shared resources are allocated or explicitly confirmed not applicable.
+- [ ] Hard constraints are operational and non-conflicting.
+- [ ] Expected outputs enumerable.
+- [ ] Non-counting outcomes cover important near misses when the task is risky.
+- [ ] Verification produces evidence and maps to the correct candidate/task identity.
+- [ ] Stop/escalation conditions are clear.
+- [ ] Output contract has a schema or required fields.
+- [ ] No unresolved critical placeholder/ambiguity remains.
+- [ ] No instruction from untrusted data has been elevated to authority.
 
-- **`READY`**: All criteria satisfied. Approved for immediate dispatch.
-- **`NOT_READY`**: Deficiencies detected. The Lead must recompile the prompt.
-- **`ESCALATE`**: Architectural contradictions detected. Escalate to the project authority.
+## Semantic review
 
-Never dispatch a prompt evaluated as `NOT_READY` or `ESCALATE`.
+Ask additionally:
+
+1. Can the agent reach “PASS” while omitting a required layer?
+2. Can the agent run tests against an artifact different from the candidate?
+3. Can the agent use an unallocated resource/path to bypass scope?
+4. Does the prompt force an unnecessary implementation technique that reduces adaptability?
+5. Does any instruction repeat the same invariant with multiple phrasings and add noise?
+6. Does the prompt require persistence without a matching verification gate?
+7. Does the context contain a stale summary that has not been revalidated?
+
+## Red-Team check for expensive/high-risk tasks
+
+```text
+How could a capable agent satisfy the literal wording while violating the intended outcome?
+```
+
+The Lead must address every credible loophole using one of these mechanisms:
+
+- sharpen success predicate;
+- add non-counting outcome;
+- add evidence requirement;
+- move runtime-critical invariant ra harness/control plane;
+- resolve authority ambiguity before dispatch.
+
+## Output
+
+Use `templates/prompt-quality-report.md`.

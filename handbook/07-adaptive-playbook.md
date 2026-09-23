@@ -1,36 +1,37 @@
-# Chapter 7: Adaptive Playbooks and Edge-Case Recovery
+# Chapter 7: Adaptive handling and edge cases
 
-## 7.1 Principles of adaptation
+## 7.1 Adaptation principle
 
-The framework provides rigorous invariants without imposing rigid, unworkable workflows. The Lead maintains non-negotiable guarantees while adapting operational mechanisms to repository realities:
-
-```text
-Core invariants stay fixed   -> Implementation mechanisms adapt
-Evidence requirement        -> Discovery commands adapt
-Ownership boundaries       -> Directory structures adapt
-Workspace isolation         -> Worktrees, clones, or containers adapt
-```
-
-## 7.2 Environments without Docker or with limited hardware
-
-Never force Docker onto a project that does not use it. Determine the underlying requirements Docker would normally satisfy: dependency isolation, environment reproducibility, or database availability.
-
-Practical alternatives:
-- SQLite or in-memory databases when semantics suffice for unit test suites
-- Dedicated schemas or databases per worker within a single local Postgres instance
-- Remote disposable test databases or mock service stubs
-- In-memory service fakes for external third-party dependencies
-- Serialized execution when resources cannot be isolated
+The framework must not become a rigid checklist that breaks the project. The Lead preserves invariants while adapting mechanisms to actual evidence.
 
 ```text
-If isolation cannot be proven on local hardware, reduce parallel concurrency.
+Invariant stays fixed -> mechanism may change
+Evidence requirement  -> command/source adapts
+Ownership discipline  -> repository structure adapts
+Isolation             -> worktree/clone/container/remote adapts
 ```
 
-Never sacrifice operational correctness merely to keep ten agents running concurrently.
+## 7.2 No Docker or insufficient local RAM
 
-## 7.3 Agent timeout or process crash
+Do not force Docker. Identify the property Docker would have protected: dependency isolation, service reproducibility, DB/queue availability.
 
-When a worker crashes or times out, preserve its workspace rather than deleting it immediately. Capture the working state:
+Possible replacements include:
+
+- SQLite/in-memory DB when its semantics are sufficient for unit tests;
+- local Postgres instance with a separate database/schema per worker;
+- remote disposable service;
+- mocks/fakes for external dependencies in unit tests;
+- sequentialize tasks when the resource cannot be isolated.
+
+```text
+No Docker -> reduce concurrency if isolation cannot be proven.
+```
+
+Do not sacrifice correctness merely to keep all 10 agents running.
+
+## 7.3 Agent timeout/crash
+
+Do not delete the worktree immediately. Freeze it and capture:
 
 ```bash
 git status --short
@@ -38,98 +39,103 @@ git diff
 git log -3 --oneline
 ```
 
-Record active resource locks, pending Decision Requests, the last known safe commit, and error logs. Classify the state as clean, dirty, or corrupted. Package the context into a Recovery Bundle, increment the assignment generation number, and assign a fresh worker. If the crashed agent subsequently resumes, its outdated generation identifier causes its outputs to be rejected as stale.
+Record leases, pending DRs, last safe commit, and warnings. Classify the workspace as clean/dirty/corrupted/unsafe. Create a Recovery Bundle and increment the assignment generation. If the previous agent returns, treat it as a zombie; reject output from the old generation.
 
-## 7.4 Specification conflicts with repository reality
+## 7.4 Spec conflicts with the repository
 
-When specifications contradict existing code, avoid arbitrarily declaring that either the specification or the codebase is correct. Identify the governing authority for the specific technical domain. For example, build commands in an outdated README are superseded by an active CI configuration, whereas API wire schemas defined in a frozen OpenAPI specification take precedence over diverging controller implementations.
+Do not arbitrarily choose “code is truth” or “spec is truth.” Determine authority by subject. For example, a build command in an old README may be superseded by current CI config; API wire shape may be governed by a frozen OpenAPI contract even when implementation has drifted.
 
-When documents of equal authority conflict:
+For an equal-authority conflict:
 
 ```text
 STATUS: AWAITING_DECISION
-Fact A: ... supporting evidence path
-Fact B: ... supporting evidence path
+Fact A: ... evidence path
+Fact B: ... evidence path
 Impact: ...
-Technical Options: ...
+Options: ...
 Recommendation: ...
 ```
 
-## 7.5 Resolving Git merge conflicts
+## 7.5 Git conflicts across branches
 
-Classify conflicts before taking action:
-1. Purely textual overlap with identical semantics: Integrator resolves directly.
-2. Integration hotspot with approved Integration Request: Integrator applies approved change.
-3. Divergent interface semantics: Halt and submit a Decision Request.
-4. Two workers modifying the same exclusive boundary: Planning defect; resolve via architectural re-alignment rather than manual patching.
+Classify the conflict:
+
+1. Textual only, semantics agree → Integrator resolves.
+2. Shared hotspot with an Integration Request → apply the request according to the frozen contract.
+3. Contract semantics differ → DR.
+4. Two WPs modify an area that should have been exclusive → planning violation; do not hide it with a manual merge.
 
 ```bash
 git diff --ours -- <file>
 git diff --theirs -- <file>
 ```
 
-Resolve conflicts based on frozen contracts and documented authority, never by assuming that the newer branch is correct.
+Resolve against the source of truth and contracts, not the “newer branch.”
 
-## 7.6 Worker requests for scope expansion
+## 7.6 Worker requests scope expansion
 
-Reference `playbooks/scope-expansion.md`. Default to rejection whenever an alternative within the assigned scope exists. When expansion is strictly necessary, define exact paths, specific rationale, invariant boundaries, required test verifications, and explicit expiration conditions.
+Use playbook `scope-expansion.md`. Principle: do not expand scope by default when an in-scope solution exists. If expansion is mandatory, define exact paths/resources, reason, invariants, additional verification, and explicit expiry/ownership.
 
-## 7.7 Sequential identifier collisions
+## 7.7 Migration collision
 
-If two branches claim the same allocated resource identifier (such as migration number `R2`), halt integration immediately. This applies to database migration scripts, network port allocations, API route namespaces, and event topic names. Never renumber scripts without checking cross-references. Determine ownership, reassign the colliding package, update references and tests, and conduct a fresh audit on the modified candidate commit.
+If two branches claim the same allocated identifier/resource slot `R2`, stop integration. In a DB project this may be a migration number; in another project it may be a port, event/schema version, command namespace, or another semantic resource. Do not renumber/reassign before checking dependency references. Determine ownership, reassign one WP, update artifacts/references/tests, and re-audit the candidate whose identity changed.
 
-## 7.8 Cloud CI failures with passing local tests
+## 7.8 CI fails while local verification passes
 
-Never dismiss CI failures as temporary flakiness without investigation. Compare commit SHAs, runtime tool versions, environment variables, runner permissions, service readiness, and filesystem case-sensitivity. When a rerun passes without code changes, document the transient failure and record the incident for investigation.
+Do not immediately conclude “CI is flaky.” Compare commit SHA, runtime versions, env/secrets, service readiness, cache, OS/filesystem differences. If a rerun passes without a root cause, record flaky evidence and the handling policy; preserve the failure record.
 
-## 7.9 Contract changes during downstream execution
+## 7.9 Contract changes while downstream work is running
 
-Modifying a frozen interface invalidates in-progress downstream work. Halt affected workers immediately and assess backward compatibility. If the change is breaking, publish a new contract version, increment assignment generations, update worker contexts, and re-execute verification suites. Never permit workers to finish work against deprecated interfaces with plans to fix discrepancies later.
+A change to a frozen contract makes downstream context stale. Pause affected WPs and determine compatibility. If the change is breaking, issue a new contract version/generation, refresh context, and rerun affected verification. Do not allow a worker to finish against the old contract and merge with a plan to “fix it later.”
 
-## 7.10 Handling main branch drift
+## 7.10 Main drift after audit
 
-Audits evaluate a candidate commit relative to a specific base commit. When the main branch advances, changes can introduce latent regressions. The Integrator rebases or merges the candidate with the updated main branch and executes verification suites. If the candidate commit SHA changes, the earlier audit is superseded.
+A candidate audit is based on a specific base/main. Main drift can create new conflicts or regressions. The Integrator must rebuild/revalidate the combination. If the candidate commit changes, the stale audit is invalid.
 
-## 7.11 Multi-package integration failures
+## 7.11 Cross-WP failure
 
-When two packages pass individually but fail upon combination, avoid subjective blame. Reconstruct execution order, contract assumptions, and diffs across both branches. Block promotion to main. Construct a corrective Work Package assigned to the appropriate boundary, or file a Decision Request if architectural ambiguities exist.
+If two WPs pass independently but fail together, do not assign blame by intuition. Reconstruct order, contracts, resources, and the integration diff. Block promotion. Create a corrective WP at the correct ownership boundary or a DR if architecture is ambiguous.
 
-## 7.12 External harness or service outages
+## 7.12 Harness/tool outage
 
-When LLM providers, Git hosting services, or CI platforms suffer outages:
-- Preserve canonical state in the local repository
-- Mark affected quality gates as `BLOCKED_ENVIRONMENT`, not `FAIL_IMPLEMENTATION`
-- Avoid consuming retry budgets on external infrastructure failures
-- Resume execution from the last valid checkpoint once services recover
+If the coding-agent provider, Git host, or CI is unavailable:
 
-## 7.13 Safe Mode protocol
+- preserve canonical state locally;
+- mark the affected check `BLOCKED_ENVIRONMENT`/`UNKNOWN`, not `FAIL_IMPLEMENTATION`;
+- do not consume retry budget for external failures when policy distinguishes them;
+- resume from checkpoint when the service returns.
 
-When coordination state becomes untrustworthy (unclear write boundaries, corrupted registries, unidentified active writers, or conflicting migration slots), halt new dispatches and integration runs immediately.
+## 7.13 Safe Mode
+
+When canonical coordination state is no longer trustworthy, such as duplicate ownership, a corrupted registry, an unknown active writer, or inconsistent migration slots, stop new dispatch and integration.
 
 Safe Mode procedure:
-1. Freeze all write operations across active worktrees.
-2. Snapshot Git branches, workspaces, and resource allocations.
-3. Reconstruct ground truth directly from repository files and commit logs.
-4. Resolve discrepancies through explicit rulings.
-5. Rebuild ownership ledgers and resource registries.
-6. Re-audit affected candidate commits.
-7. Resume operations under a newly established baseline and generation counter.
 
-## 7.14 Reducing concurrency is an engineering decision
+```text
+1. Freeze mutations
+2. Snapshot Git/workspaces/resources
+3. Reconstruct truth from repository + evidence
+4. Resolve contradictions
+5. Rebuild ownership/resource ledger
+6. Revalidate affected candidates
+7. Resume with new baseline/generation
+```
 
-Coordinating five to ten agents represents capacity, not a mandatory quota. When a project presents only three orthogonal boundaries, running three agents is the correct engineering decision. Forcing artificial decomposition increases coordination overhead, hotspot contention, and error rates.
+## 7.14 Lower concurrency can be the correct decision
+
+“5–10 agents” describes capability, not a quota. If the project has only three independent boundaries, run three agents. Artificially splitting work across 10 agents increases hotspots, coordination cost, and hallucination surface.
 
 ## 7.15 Final decision heuristic
 
-When encountering unmapped edge cases, prioritize in order:
+When no playbook fits, the Lead applies this order:
 
 ```text
-1. Protect security invariants and irreversible data
-2. Protect authoritative specifications and frozen contracts
-3. Protect ownership boundaries and resource allocations
-4. Protect audit integrity and verified evidence
-5. Preserve system recoverability
-6. Optimize for delivery speed and developer convenience
+Protect security/irreversible data
+Protect source-of-truth/contracts
+Protect ownership/resources
+Protect audit identity/evidence
+Preserve recoverability
+Then optimize speed/convenience
 ```
 
-When evidence remains insufficient, the valid operational state is `UNKNOWN` or `AWAITING_DECISION`. Never fabricate confident assumptions.
+If evidence is still insufficient, the correct state is `UNKNOWN` or `AWAITING_DECISION`, not a fabricated confident answer.

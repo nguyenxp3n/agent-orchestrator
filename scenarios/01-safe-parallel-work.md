@@ -1,27 +1,27 @@
 # Scenario: Safe Parallel Work
 
 ## Trigger
-Two independent Work Packages are ready with zero path or resource overlaps.
+Two independent WPs are ready with no path/resource overlap.
 
 ## Risk
-Wasting concurrency through unnecessary serialization, or causing collisions through false assumptions of independence.
+Unnecessary serialization wastes concurrency; an incorrect independence assumption causes collision.
 
 ## Evidence
-Ownership Matrix, Resource Registry, dependency DAG, and frozen interface contracts.
+Ownership Matrix; resource registry; hard dependencies; frozen contracts.
 
 ## Immediate Action
-Schedule packages in the same parallel execution wave following readiness checks.
+Schedule both in the same parallel wave after the readiness gate.
 
 ## Forbidden Response
-Never grant broad write permissions simply because two tasks appear distinct.
+Do not grant broad permissions merely because two tasks “look different.”
 
 ## Recovery Procedure
-If an unexpected overlap surfaces during execution, halt the affected package and realign ownership boundaries.
+If overlap is discovered mid-execution, pause the affected WP and re-plan ownership.
 
 ## Exit Criteria
-Both candidate branches pass independent audits with zero cross-package regressions.
+Both candidates pass independent audit and create no cross-WP regression.
 
 ## Example Lead Response
 ```text
-WP-A and WP-B share zero exclusive paths or resources. Dispatching concurrently in isolated worktrees.
+WP-A and WP-B share no exclusive path/resource; dispatch them in parallel in separate worktrees.
 ```

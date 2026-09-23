@@ -1,12 +1,15 @@
-# Playbook: Operating in Environments Without Docker
+# Playbook: Environment Without Docker / Low RAM
 
 ## Trigger
-The repository or test suite expects Docker, but container runtimes are unavailable or hardware resources are constrained.
+Project documentation references containers, but the execution environment has no Docker or insufficient resources.
 
-## Procedure
-1. **Identify the underlying requirement**: Determine what Docker was providing (database instance, message broker, or clean build environment).
-2. **Deploy lightweight alternatives**:
-   - Use SQLite or in-memory database drivers for unit and component tests.
-   - Connect to a shared local database instance using separate schemas or database names per worker.
-   - Employ in-memory mock stubs for external third-party services.
-3. **Adjust parallel concurrency**: If resource isolation cannot be proven on local hardware, reduce the number of concurrent workers and serialize task execution.
+## Adaptation
+Identify the properties that must be preserved: isolation, DB/service semantics, reproducibility. Choose a separate local service, in-memory/fake dependency for unit tests, remote disposable dependency, separate clone, or reduced concurrency.
+
+```text
+If isolation cannot be proven -> reduce parallel writers.
+If production-specific behavior cannot be reproduced -> mark that evidence UNKNOWN and block the assurance level that requires it.
+```
+
+## Exit Criteria
+The replacement mechanism is recorded in the Project Execution Profile; relevant tests run; limitations remain visible.

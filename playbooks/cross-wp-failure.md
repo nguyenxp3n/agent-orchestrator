@@ -1,13 +1,16 @@
-# Playbook: Cross-Package Integration Failure
+# Playbook: Cross-WP Failure
 
 ## Trigger
-Two Work Packages pass individual audits, but the test suite fails when both are merged.
+Two or more WPs pass independent audit but fail after integration.
 
 ## Procedure
-1. **Halt integration queue**: Block further merges to main.
-2. **Isolate the conflict**: Compare diffs across both packages to identify implicit dependencies, shared database state, or port collisions.
-3. **Classify root cause**:
-   - Interface mismatch: Package B made invalid assumptions about Package A.
-   - Shared resource contention: Both packages modified the same table or namespace.
-   - Ordering dependency: Packages must execute in a specific sequential order.
-4. **Assign corrective work**: Create a targeted corrective Work Package assigned to the appropriate boundary, or submit a Decision Request if specifications are ambiguous.
+Stop promotion. Reconstruct merge order, contract versions, migrations/resources, and integration-only changes. Determine whether the failure is contract mismatch, ordering, hidden shared state, or baseline drift.
+
+```text
+Independent PASS + Independent PASS != Combined PASS
+```
+
+Create a corrective WP at the correct ownership boundary or a DR if architecture is unresolved.
+
+## Exit Criteria
+The combined gate passes on the integrated SHA; corrective evidence is traceable; the failure is not hidden by disabling tests.

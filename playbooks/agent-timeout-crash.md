@@ -1,19 +1,19 @@
-# Playbook: Agent Timeout or Crash Recovery
+# Playbook: Agent Timeout / Crash
 
 ## Trigger
-A coding worker terminates unexpectedly, times out, or stops responding.
+Worker loses heartbeat, times out, process crashes, or provider session disappears.
 
-## Procedure
-1. **Preserve workspace**: Do not delete the worktree. Capture the active state:
-   ```bash
-   git status --short
-   git diff
-   git log -3 --oneline
-   ```
-2. **Catalog state**: Record uncommitted changes, modified paths, and active resource locks.
-3. **Classify status**:
-   - Clean: Work was committed cleanly up to a known commit SHA.
-   - Dirty: Uncommitted modifications exist in the working tree.
-   - Corrupted: Incomplete file writes or invalid syntax across files.
-4. **Increment generation**: Increment the `ASSIGNMENT_GENERATION` counter for this Work Package.
-5. **Dispatch recovery**: Dispatch a fresh worker with the Recovery Bundle containing captured diffs and the incremented generation counter. If the previous worker subsequently resumes, its outputs are rejected as stale.
+## Freeze and Capture
+Do not delete the workspace. Capture `git status`, `git diff`, recent commits, leases, DRs, and warnings.
+
+```bash
+git status --short
+git diff
+git log -3 --oneline
+```
+
+## Recovery
+Classify as clean recoverable / dirty recoverable / corrupted / unsafe-unknown. Create a Recovery Bundle, increment assignment generation, and transfer WP resources to the new worker. Reject output from the old generation.
+
+## Exit Criteria
+The new Worker receives the exact safe commit/context/resources; the zombie generation is fenced; remaining acceptance criteria are explicit.

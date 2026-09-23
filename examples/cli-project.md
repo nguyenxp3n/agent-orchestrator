@@ -1,23 +1,29 @@
-# Example: Command-Line Developer Tool
+# Example: CLI Tool
 
-## Objective
-Implement new command subtrees and flag parsing without concurrent modifications to the root command dispatcher.
+## Intake
 
-## Dependency DAG
+Identify the command tree, parser library, public flags, config format, filesystem side effects, and supported platforms.
+
+## Work Packages
+
 ```text
-WP-100 Command Flag Spec Freeze
-  +--> WP-210 Config Subcommand -------+
-  +--> WP-220 Build Subcommand --------+--> WP-400 CLI E2E Verification
+WP-CMD-IMPORT -> import subcommand
+WP-CMD-EXPORT -> export subcommand
+WP-CONFIG     -> config validation
+WP-DOCS       -> usage/reference
+ROOT CLI REGISTRATION -> INTEGRATION_ONLY if multiple workers add commands
 ```
 
-## Boundary and Resource Allocation
-```text
-WP-100: specs/cli-spec.md (Frozen command syntax)
-WP-210: pkg/cmd/config/**, Flag namespace `--config-*`
-WP-220: pkg/cmd/build/**, Flag namespace `--build-*`
+## Ownership
+
+Public flag names and exit-code semantics are semantic resources. Two workers must not independently assign different meanings to the same `--format` flag.
+
+## Verification
+
+```bash
+pytest
+# or cargo test / go test ./... according to project
+<cli-smoke-command> --help
 ```
 
-The root command registry (`cmd/root.go`) is designated `INTEGRATION_ONLY`.
-
-## Verification Protocol
-Workers execute unit tests against subcommands using mock terminal streams. The Integrator registers approved subcommands into the root dispatcher and validates automated CLI help generation and end-to-end command tests.
+The audit must verify actual stdout/stderr/exit codes and generated files, not only unit tests.

@@ -1,11 +1,12 @@
-# Examples: Non-Prescriptive Project Profiles
+﻿# Examples: Non-Prescriptive Project Profiles
 
-The files in this directory **do not represent mandatory framework structures**. They illustrate how a single coordination methodology maps across diverse software architectures:
+The files in this directory **do not define a required framework structure**. They only illustrate how the same methodology maps to different project types.
 
-- `six-agent-web-project.md`: Web Fullstack application with concurrent backend, frontend, infrastructure, and CI workstreams.
-- `backend-microservices.md`: Distributed microservices architecture with Protobuf schemas, event topics, and gateway routing.
-- `mobile-project.md`: Native mobile application with client models, offline sync, and screen views.
-- `cli-project.md`: Command-line developer tool with command registries and configuration schemas.
-- `ten-agent-project.md`: Scaled multi-agent deployment across neutral domain boundaries.
+- `six-agent-web-project.md`: Web Fullstack.
+- `backend-microservices.md`: Microservices Backend.
+- `mobile-project.md`: Mobile App.
+- `cli-project.md`: CLI / developer tool.
+- `ten-agent-project.md`: a larger team, using neutral domains.
 
-When applying Agent Orchestrator, the Lead begins directly with the Project Intake and Project Execution Profile of the actual repository. Never copy paths, migration numbers, ports, or work package breakdowns from these examples unless verified by repository truth.
+When applying AGENT-ORCHESTRATOR, the Lead must start from the actual repository's Project Intake and Project Execution Profile. Do not copy migrations, paths, ports, commands, roles, or WP decomposition from an example unless project evidence supports them.
+
