@@ -11,25 +11,25 @@ DRAFT -> READY -> ASSIGNED -> RUNNING
                     |                    |
                     |                    +-> REWORK -> RUNNING
                     |                    +-> ACCEPTED -> INTEGRATING -> INTEGRATED
-                    +---------------------> FAILED/CANCELLED when explicitly decided
+                    +---------------------> FAILED/CANCELLED (Explicit ruling)
 ```
 
 ## Agent Runtime States
 
 ```text
-READY -> RUNNING -> SUSPECTED_STALLED -> PAUSED/FAILED/REASSIGNED
+READY -> RUNNING -> SUSPECTED_STALLED -> PAUSED / FAILED / REASSIGNED
 ```
 
-Agent state và WP state không đồng nhất. Worker crash có thể để WP recoverable.
+Agent runtime states and Work Package states are decoupled. A crashed worker leaves the Work Package recoverable.
 
-## Assignment Generation
+## Assignment Generation Counter
 
-Mỗi reassignment tăng generation. Message/output từ generation cũ là stale.
+Every reassignment increments the generation counter (`ASSIGNMENT_GENERATION`). Submissions matching earlier generations are discarded as stale.
 
-## Assurance Labels
+## Assurance Levels
 
 ```text
 IMPLEMENTED < LOCALLY_VERIFIED < ACCEPTED < INTEGRATED < RELEASE_VERIFIED
 ```
 
-Mỗi mức cần evidence riêng; không tự nhảy mức bằng ngôn từ.
+Every level requires distinct verified evidence. Never escalate assurance levels through conversational claims.

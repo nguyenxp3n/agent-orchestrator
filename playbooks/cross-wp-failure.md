@@ -1,16 +1,13 @@
-# Playbook: Cross-WP Failure
+# Playbook: Cross-Package Integration Failure
 
 ## Trigger
-Hai hay nhiều WPs đều pass independent audit nhưng fail khi tích hợp.
+Two Work Packages pass individual audits, but the test suite fails when both are merged.
 
 ## Procedure
-Dừng promotion. Reconstruct merge order, contract versions, migrations/resources và integration-only changes. Xác định lỗi thuộc contract mismatch, ordering, hidden shared state hay baseline drift.
-
-```text
-Independent PASS + Independent PASS != Combined PASS
-```
-
-Tạo corrective WP ở đúng ownership boundary hoặc DR nếu architecture không xác định.
-
-## Exit Criteria
-Combined gate pass trên integrated SHA; corrective evidence traceable; không che lỗi bằng disabling tests.
+1. **Halt integration queue**: Block further merges to main.
+2. **Isolate the conflict**: Compare diffs across both packages to identify implicit dependencies, shared database state, or port collisions.
+3. **Classify root cause**:
+   - Interface mismatch: Package B made invalid assumptions about Package A.
+   - Shared resource contention: Both packages modified the same table or namespace.
+   - Ordering dependency: Packages must execute in a specific sequential order.
+4. **Assign corrective work**: Create a targeted corrective Work Package assigned to the appropriate boundary, or submit a Decision Request if specifications are ambiguous.

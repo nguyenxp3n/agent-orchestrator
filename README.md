@@ -1,33 +1,42 @@
-﻿# AGENT-ORCHESTRATOR
+# AGENT-ORCHESTRATOR
 
 **Model-Agnostic · Project-Agnostic · Adaptive · Evidence-Driven**
 
-Agent Orchestrator là bộ cẩm nang vận hành cho AI Lead Architect điều phối 5–10+ coding agents trên cùng một software project. Package tập trung vào phương pháp luận, prompts, templates, checklists, playbooks và case studies; nó không triển khai orchestration engine, SDK hay scheduler runtime. Lead có thể áp dụng bộ tài liệu này trên Claude, GPT/Codex, Gemini/Antigravity, Cursor, Windsurf hoặc harness tương đương.
+Agent Orchestrator is an operational field manual for an AI Lead Architect coordinating 5 to 10+ coding agents on a single software repository. The package provides methodologies, prompts, templates, checklists, playbooks, and case studies. It does not ship a standalone orchestration engine, SDK, or scheduler daemon. A Lead can apply these operating standards directly on Claude, OpenAI Codex, Gemini, Cursor, Windsurf, or equivalent agent harnesses.
 
-> Invariant trung tâm: `WORKER_DONE != ACCEPTED`. Worker chỉ báo cáo claim; acceptance chỉ xuất hiện sau independent verification có evidence.
+> Core Invariant: `WORKER_DONE != ACCEPTED`. A worker report represents a completion claim. Acceptance occurs only after independent verification backed by concrete evidence.
 
-## Project-Agnostic: dùng cho mọi dự án phần mềm
+## Project-Agnostic: built for any software repository
 
-Agent Orchestrator áp dụng cho nhiều loại software project: Web Fullstack, Microservices Backend, Mobile App, Distributed Systems, CLI/Developer Tools và các cấu trúc khác. Lead cần đủ project input để xây Project Model và Project Execution Profile trước khi điều phối.
+Agent Orchestrator applies across diverse architectures: Web Fullstack, Microservices Backend, Mobile Applications, Distributed Systems, CLI Developer Tools, and hybrid stacks. The Lead requires sufficient project input to construct a Project Model and a Project Execution Profile before scheduling work.
 
-Project input thường gồm `docs/`, `spec/`, `plan/`, `workflow/`, repository tree, build/test manifests, CI config, DB/schema/env information và project instructions. Đây là **các loại thông tin logic, không phải tên thư mục bắt buộc**: nếu project dùng ADR/RFC/tickets, Makefile, Gradle, Cargo, Xcode, Bazel, Terraform hay nguồn tương đương thì Lead phải discover và dùng nguồn thực tế đó.
+Project inputs include architecture documents (`docs/`), specifications (`spec/`), implementation plans (`plan/`), operational workflows (`workflow/`), repository trees, build and test manifests, CI configurations, schema definitions, environment specifications, and developer instructions. These represent logical categories rather than mandatory folder names. When a repository uses Architecture Decision Records (ADRs), RFCs, issues, Makefiles, Gradle, Cargo, Xcode, Bazel, or Terraform, the Lead discovers and works with those existing sources.
 
-Nguyên tắc: **project truth quyết định framework adaptation; framework không ép project phải giống một case study mẫu.**
+Principle: **Repository truth drives framework adaptation. The framework never forces a project to fit an arbitrary template.**
 
-## Framework xử lý vấn đề gì?
+## Problem scope
 
-Khi nhiều AI cùng sửa một repository, rủi ro lớn nhất tập trung ở coordination giữa các agent, không phải khả năng viết code riêng lẻ: hai agent cùng sửa migration; một worker lấn sang file của worker khác; agent báo hoàn tất nhưng bỏ frontend; một branch pass độc lập nhưng fail khi ghép; CI cloud khác local; worker crash rồi quay lại gửi kết quả cũ; main drift sau audit. Agent Orchestrator biến các rủi ro đó thành một quy trình có thể kiểm soát.
+When multiple AI agents modify a shared repository, the primary failure mode is coordination breakdown rather than syntax generation:
+- Multiple agents generate conflicting database migrations.
+- A worker silently edits files assigned to another worker.
+- An agent reports completion while omitting required frontend layers or tests.
+- A branch passes tests in isolation but breaks upon merge.
+- Cloud CI environments diverge from local test environments.
+- An agent crashes, restarts, and resubmits stale state.
+- Main branch drift invalidates earlier audit results.
 
-## Bốn nguyên tắc bất biến
+Agent Orchestrator establishes an enforceable workflow to isolate, audit, and serialize these operations.
 
-1. Zero Hallucination: không có evidence thì ghi `UNKNOWN`.
-2. Zero Trust: báo cáo agent là claim, không phải truth.
-3. Mandatory Verification: mọi transition quan trọng phải có bằng chứng thực tế.
-4. Atomic Completion: thiếu một acceptance criterion bắt buộc thì WP chưa hoàn thành.
+## Four core invariants
 
-Framework áp dụng nguyên tắc **Strict on outcomes, adaptive on mechanisms**. Isolation là bắt buộc; cơ chế có thể là Git worktree, clone riêng, container hoặc remote workspace. Quality gate cũng bắt buộc, nhưng Lead phải discover command từ project thay vì ép `task qa` hay Docker vào mọi repository.
+1. Zero Hallucination: record `UNKNOWN` whenever evidence is absent. Never fabricate repository state or test outcomes.
+2. Zero Trust: treat every agent report as an unverified claim until independently validated.
+3. Mandatory Verification: require verified test runs, clean diffs, and artifact checks before state transitions.
+4. Atomic Completion: mark a work package incomplete if any mandatory acceptance criterion is missing or failing.
 
-## Lifecycle chuẩn
+The framework enforces a rule of **strict outcomes, adaptive mechanisms**. Workspace isolation is non-negotiable, whether implemented through Git worktrees, separate clones, containers, or remote workspaces. Quality gates are equally non-negotiable, but the Lead discovers the actual verification commands from the project rather than imposing rigid tool assumptions.
+
+## Standard lifecycle
 
 ```text
 PROJECT INPUT
@@ -47,29 +56,31 @@ PROJECT INPUT
   -> MAIN / RELEASE
 ```
 
-## Đọc theo mục đích
+## Reading guide
 
-- Bắt đầu trong 15 phút: [START-HERE.md](START-HERE.md).
-- Hiểu triết lý và role boundaries: [handbook/01-core-philosophy.md](handbook/01-core-philosophy.md).
-- Intake, WP, DAG, worktrees: [handbook/02-project-intake-dag-planning.md](handbook/02-project-intake-dag-planning.md).
-- Paths, locks, migration slots: [handbook/03-resource-locking-boundaries.md](handbook/03-resource-locking-boundaries.md).
-- Prompt Engineering + prompt compiler + role prompts: [handbook/04-ready-to-use-prompts.md](handbook/04-ready-to-use-prompts.md), thư mục `prompt-engineering/` và `prompts/`.
-- Audit độc lập: [handbook/05-zero-trust-forensic-audit.md](handbook/05-zero-trust-forensic-audit.md).
-- Sequential integration + CI/CD: [handbook/06-sequential-integration-cicd.md](handbook/06-sequential-integration-cicd.md).
-- Edge cases và ứng biến: [handbook/07-adaptive-playbook.md](handbook/07-adaptive-playbook.md).
-- Project-type examples (non-prescriptive): [examples/README.md](examples/README.md).
+- Fast-track setup (15 minutes): [START-HERE.md](START-HERE.md).
+- Operating philosophy and role boundaries: [handbook/01-core-philosophy.md](handbook/01-core-philosophy.md).
+- Intake, work packages, DAG scheduling, and worktrees: [handbook/02-project-intake-dag-planning.md](handbook/02-project-intake-dag-planning.md).
+- Path ownership, file locks, and migration allocation: [handbook/03-resource-locking-boundaries.md](handbook/03-resource-locking-boundaries.md).
+- Prompt Engineering, prompt compiler, and role prompts: [handbook/04-ready-to-use-prompts.md](handbook/04-ready-to-use-prompts.md), `prompt-engineering/`, and `prompts/`.
+- Independent forensic audit: [handbook/05-zero-trust-forensic-audit.md](handbook/05-zero-trust-forensic-audit.md).
+- Sequential integration and CI/CD gates: [handbook/06-sequential-integration-cicd.md](handbook/06-sequential-integration-cicd.md).
+- Edge cases, crash recovery, and adaptive playbooks: [handbook/07-adaptive-playbook.md](handbook/07-adaptive-playbook.md).
+- Architecture examples (non-prescriptive): [examples/README.md](examples/README.md).
 
+## Prompt Compiler: compiling project truth into dispatch prompts
 
-## Prompt Compiler: biến project truth thành prompt sẵn sàng dispatch
+Agent Orchestrator eliminates manual, ad-hoc prompt writing. The Lead compiles targeted execution prompts directly from Work Package definitions, source authority, ownership matrices, allocated resources, expected artifacts, and verification commands. Reference `prompt-engineering/01-prompt-anatomy.md`, use `prompts/prompt-compiler.md`, and validate outputs against the Prompt Quality Gate before dispatching workers.
 
-Agent Orchestrator không yêu cầu Lead tự “viết prompt hay” cho từng agent. Lead compile prompt từ Work Package, source authority, ownership, resource allocation, expected outputs và verification contract. Bắt đầu tại `prompt-engineering/01-prompt-anatomy.md`, dùng `prompts/prompt-compiler.md`, rồi chạy Prompt Quality Gate trước dispatch.
+Three operating modes:
+- **Compact**: For isolated bug fixes and small tasks with constrained token budgets.
+- **Standard**: For routine feature work packages requiring standard boundary enforcement.
+- **Long-Horizon**: For complex, multi-turn tasks requiring explicit success predicates, non-counting outcome checks, adversarial red-teaming, and audit-gated returns.
 
-Ba mode: **Compact** cho task nhỏ, **Standard** cho WP thông thường, **Long-Horizon** cho task dài/rủi ro cần success predicate, non-counting outcomes, adversarial verification và audit-gated return.
+## Operating discipline
 
-## Quy tắc vận hành
+The Lead Orchestrator is not an all-purpose worker. The Lead owns task decomposition, architectural constraints, resource governance, decision arbitration, audit disposition, and integration sequencing. Workers own code implementation strictly within their assigned boundaries. Auditors own objective verification. Integrators own approved branch merges. Strict separation of duties prevents the Lead from casually modifying source code and rubber-stamping its own unverified changes.
 
-Lead Orchestrator chịu trách nhiệm decomposition, architecture constraints, ownership, resources, decision arbitration, audit disposition và integration order. Worker triển khai trong phạm vi WP; Auditor xác minh độc lập; Integrator xử lý merge đã phê duyệt. Separation of duties ngăn Lead âm thầm sửa code rồi tự nghiệm thu chính thay đổi đó.
+## Warranty boundaries
 
-## Giới hạn bảo đảm
-
-Framework không hứa zero defects hoặc loại bỏ hallucination tuyệt đối. Mục tiêu enforceable là: **không chấp nhận completion claim chưa được kiểm chứng, không cố ý cho phép write ngoài scope, và không merge candidate đã mất tính đồng nhất với evidence audit.**
+The framework does not guarantee defect-free software or total elimination of model errors. Its enforceable objective is operational: **reject unverified completion claims, prevent writes outside assigned scopes, and block merges when candidates drift from audited state.**

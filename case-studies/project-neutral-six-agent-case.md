@@ -1,40 +1,40 @@
 # Case Study: Project-Neutral Six-Agent Parallel Delivery
 
-## 1. Mục đích
+## 1. Purpose
 
-Case study này **không mô tả một dự án bắt buộc**. Nó là một mô hình trung tính để minh họa cách Lead Orchestrator điều phối sáu agents trên bất kỳ software project nào có công việc song song, shared resources và integration hotspots.
+This case study **does not represent a mandatory project structure**. It provides a neutral reference model demonstrating how an AI Lead Orchestrator coordinates six concurrent agents across any software repository characterized by parallel workstreams, shared resources, and integration hotspots.
 
-Các nhãn `Domain A`, `Domain B`, `Domain C`, `UI/Client`, `Infrastructure`, `CI/CD` chỉ là vai trò minh họa. Khi áp dụng thực tế, Lead phải thay chúng bằng domain thật được discover từ project input.
+Labels such as `Domain A`, `Domain B`, `Domain C`, `UI/Client`, `Infrastructure`, and `CI/CD` are illustrative roles. In actual practice, the Lead substitutes real domains discovered from repository inputs.
 
-Ví dụ ánh xạ:
+Example domain mappings:
 
-| Project type | Domain A/B/C có thể là | UI/Client có thể là | Shared hotspot thường gặp |
+| Project Type | Domain A/B/C Examples | UI/Client Examples | Common Shared Hotspots |
 |---|---|---|---|
-| Web Fullstack | auth, billing, search | web feature/module | router, DB migrations, OpenAPI |
-| Microservices Backend | service A/B/C | consumer/client SDK | proto/schema, event contract, gateway |
-| Mobile App | sync, profile, offline cache | screens/features | navigation, shared model, API contract |
-| Distributed System | scheduler, worker, storage | admin/control client | protocol/schema, leader state, ports |
-| CLI Tool | parser, command groups, config | CLI UX/help | root command registry, config schema |
+| Web Fullstack | Auth, billing, search | Web application views | Central router, database migrations, OpenAPI schema |
+| Microservices Backend | Service A, B, C | Consumer/client SDK | Protobuf schemas, event contracts, API gateway |
+| Mobile App | Sync engine, user profile, cache | Native feature screens | Navigation graph, shared model types, API client |
+| Distributed System | Scheduler, worker, storage | Operator CLI / admin console | Protocol schemas, state coordination, network ports |
+| CLI Tool | Flag parser, command groups, config | Terminal UX, help formats | Root command registry, global config schema |
 
-## 2. Project input là source of truth
+## 2. Project input as the single source of truth
 
-Lead không bắt đầu từ tên case study. Lead bắt đầu từ project input thực tế:
+The Lead begins with actual repository inputs rather than pre-baked case study templates:
 
 ```text
-architecture docs / docs-equivalent
-specifications / spec-equivalent
-implementation plan / plan-equivalent
-workflow / engineering process
-repository tree
-build + test manifests
-CI configuration
-DB/schema/migration model nếu có
-environment constraints
+Architecture documentation (docs/ or equivalent)
+Formal specifications (spec/ or equivalent)
+Implementation plans (plan/ or equivalent)
+Engineering workflows (workflow/ or equivalent)
+Repository filesystem tree
+Build and test manifests
+CI/CD configuration files
+Database schema and migration models (if applicable)
+Environment profiles and constraints
 ```
 
-Tên thư mục `docs/`, `spec/`, `plan/`, `workflow/` chỉ là ví dụ phổ biến. Nếu dự án dùng ADRs, RFCs, tickets, Makefile, Cargo workspace, Xcode project, Gradle, Bazel, Helm, Terraform hay cấu trúc khác, Lead phải discover và compile chúng vào Project Execution Profile.
+Directory names like `docs/`, `spec/`, `plan/`, and `workflow/` are common examples. When a project uses ADRs, RFCs, issues, Makefiles, Cargo workspaces, Xcode configurations, Gradle, Bazel, Helm, or Terraform, the Lead discovers and compiles them into the Project Execution Profile.
 
-## 3. Mô hình sáu agents khái quát
+## 3. Generalized six-agent topology
 
 ```text
 Lead Orchestrator
@@ -43,103 +43,96 @@ Lead Orchestrator
   +-- A2 Domain B          [Resource Slot R2]
   +-- A3 Domain C          [Resource Slot R3]
   +-- A4 UI / Client       [Resource Slot R4 or contract consumer]
-  +-- A5 Infrastructure    [isolated infra ownership]
-  +-- A6 CI/CD             [workflow ownership]
+  +-- A5 Infrastructure    [Isolated infrastructure ownership]
+  +-- A6 CI/CD             [Pipeline workflow ownership]
 
 All workers -> Completion Claim -> Independent Audit
 Accepted queue -> DAG-aware Sequential Integration -> Global QA -> Cloud/External CI
 ```
 
-`Resource Slot` có thể là migration ID, port, queue name, schema namespace, event name, CLI command namespace, feature flag hoặc resource semantic khác. Dự án không có migration thì không tạo migration concept giả tạo.
+A `Resource Slot` may represent a database migration sequence number, network port, queue topic, schema namespace, CLI command flag, or feature flag. Repositories without databases do not construct artificial migration slots.
 
-## 4. Incident A: Worker báo xong nhưng thiếu một tầng bắt buộc
+## 4. Incident A: Worker reports completion while omitting required layers
 
-Giả sử WP-D yêu cầu:
-
+Suppose Work Package D specifies:
 ```text
-backend/service implementation
-client/UI integration
-contract adaptation
-unit tests
+Backend service implementation
+Client UI integration
+Contract adaptation
+Unit and integration tests
 ```
 
-Worker báo backend và tests đã xanh nhưng client/UI artifact chưa tồn tại. Auditor phải kết luận:
+The worker reports that backend logic and unit tests pass cleanly, but client interface components were never created. The Auditor concludes:
 
 ```text
 Implemented subset: PASS
 Tests for implemented subset: PASS
-Required client/UI outputs: MISSING
-WP: REJECT_REWORK / INCOMPLETE
+Required client interface deliverables: MISSING
+Work Package disposition: REJECT_REWORK / INCOMPLETE
 ```
 
-Nếu dự án là CLI thì “client/UI” có thể tương ứng root command registration/help output; nếu là microservices thì có thể là consumer contract hoặc integration adapter. Nguyên tắc là **Atomic Completion**, không phải một file path cụ thể.
+In a CLI project, "client interface" might correspond to root command registration and help outputs; in microservices, it might represent consumer integration adapters. The governing principle is **Atomic Completion**, not a specific file path.
 
-## 5. Incident B: Worker xin lấn shared resource
+## 5. Incident B: Worker attempts uncoordinated edits to shared hotspots
 
-Giả sử Infrastructure Worker phát hiện cần thay đổi shared schema/gateway/root bootstrap ngoài ownership.
+Suppose the Infrastructure Worker discovers a need to modify a shared routing table, gateway configuration, or central bootstrap entrypoint outside its assigned boundary.
 
-Lead từ chối direct write vì:
+The Lead rejects direct write access because:
+- The resource belongs to another package or is designated `INTEGRATION_ONLY`.
+- Shared hotspots carry broad cross-package blast radiuses.
+- The worker does not hold authority over the global domain contract.
 
-- resource đã thuộc WP khác hoặc `INTEGRATION_ONLY`;
-- shared hotspot có blast radius liên-WP;
-- worker không sở hữu domain contract đó.
+Resolution: The worker maintains changes within its assigned scope and submits a formal `Integration Request` or `Resource Request`, which the Integrator applies during sequential integration.
 
-Giải pháp: giữ implementation trong allowed scope, gửi `Integration Request`, `Resource Request`, hoặc tạo corrective WP nếu dependency thật sự cần thay đổi.
+Operational rule: **Rejecting scope expansion early is far less costly than resolving merge collisions late.**
 
-Bài học: **từ chối scope expansion sớm rẻ hơn xử lý collision muộn**.
+## 6. Incident C: Controlled and bounded scope extensions
 
-## 6. Incident C: Scope extension có kiểm soát
-
-Không phải mọi request ngoài scope đều bị bác. Nếu Worker chứng minh một shared build/task configuration cần thay đổi để expose deliverable, Lead có thể grant **đúng file/resource nhỏ nhất**, kèm invariants và quality gates.
-
-Ví dụ trung tính:
+Not every out-of-scope request is invalid. When a worker proves that modifying a shared build script is required to expose its deliverable, the Lead grants **minimal write access to that specific file**, accompanied by strict invariants and extra test gates:
 
 ```text
-Granted: <shared-build-or-task-config>
+Granted path: <shared-build-configuration-file>
 Conditions:
-- preserve existing commands/tasks
-- project quality gate remains green
-- spec/contract validation remains green when applicable
+- Existing build tasks and targets must remain intact
+- Repository quality gate must exit with code 0
+- Contract schema validation must pass
 ```
 
-Framework không ép `Taskfile.yml`; dự án có thể dùng `Makefile`, `package.json`, `Cargo.toml`, `build.gradle`, `justfile`, Bazel, Xcode settings hoặc công cụ khác.
+The framework does not mandate specific build runners; projects may use `Makefile`, `package.json`, `Cargo.toml`, `build.gradle`, `justfile`, Bazel, or Xcode settings.
 
-## 7. Incident D: Xác minh External CI trực tiếp
+## 7. Incident D: Direct verification of external CI runs
 
-Worker báo cloud CI thành công chỉ là claim. Lead/Auditor phải kiểm run gắn đúng candidate SHA bằng provider phù hợp.
-
-Ví dụ GitHub:
+A worker claiming that cloud CI passed represents an unverified assertion. The Lead or Auditor inspects the pipeline execution directly:
 
 ```bash
 gh run list --branch <branch> --limit 10
 gh run view <run-id>
 ```
 
-GitLab/Bitbucket/Jenkins/Buildkite hoặc hệ thống khác dùng API/CLI tương ứng. Nếu không có quyền truy cập, trạng thái là `UNVERIFIED_EXTERNAL_CI`, không tự nâng thành PASS.
+For GitLab, Bitbucket, Jenkins, or Buildkite, use equivalent APIs or CLIs. When external pipeline access is unavailable, record `UNVERIFIED_EXTERNAL_CI` rather than assuming success.
 
-## 8. Sequential Integration
+## 8. Sequential integration in practice
 
-Sau independent acceptance, candidates không được merge đồng loạt. Lead/Integrator chọn order theo DAG/resource dependencies, integrate từng candidate và chạy cross-WP/global verification sau mỗi bước.
+Following independent audit approval, branches are never merged simultaneously. The Lead and Integrator execute sequential merges governed by DAG prerequisites, running global cross-package test suites after every step:
 
 ```text
 ACCEPTED WP-A
-   -> integrate
-   -> global gate
+   -> merge to main
+   -> global verification gate
 ACCEPTED WP-B
-   -> integrate
-   -> global gate
-...
+   -> merge to main
+   -> global verification gate
 ```
 
-## 9. Các nguyên tắc rút ra
+## 9. Key takeaways
 
-1. Project input thực tế quyết định decomposition, không phải case study.
-2. Lead phải map expected outputs theo project type và WP thật.
-3. Semantic resource phải cấp phát trước khi có concurrent writers.
-4. Shared hotspots không giao đồng thời cho nhiều workers.
-5. Lead phải chặn scope expansion không được phê duyệt.
-6. Scope extension hợp lệ phải bounded, explicit và có extra verification.
-7. External CI/status cần evidence trực tiếp hoặc ghi `UNVERIFIED`.
+1. Actual repository inputs determine task decomposition, not generic case studies.
+2. The Lead maps expected deliverables to actual project types and concrete Work Packages.
+3. Semantic resources must be allocated before concurrent workers begin execution.
+4. Shared hotspots must not be assigned to multiple concurrent workers simultaneously.
+5. The Lead rejects unapproved scope expansion requests by default.
+6. Legitimate scope extensions must be strictly bounded, explicit, and audited with additional verification gates.
+7. External CI runs require direct evidence; missing access must be recorded as `UNVERIFIED`.
 8. `WORKER_DONE != ACCEPTED`.
-9. Integration order theo dependency, không theo tốc độ worker.
-10. Framework không giả định Web, DB, Docker, migration hay bất kỳ toolchain cụ thể nào.
+9. Integration sequence follows the dependency DAG, never worker completion speed.
+10. The framework assumes no mandatory technology stack: it operates on any programming language, build tool, or deployment model.

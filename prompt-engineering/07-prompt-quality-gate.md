@@ -1,63 +1,33 @@
-# 07: Prompt Quality Gate
+# 07: The Prompt Quality Gate
 
-## Mục tiêu
+## 1. Purpose
 
-Không dispatch prompt chỉ vì “đọc có vẻ tốt”. Gate kiểm cấu trúc và semantics trước khi tiêu tốn agent time.
+The Prompt Quality Gate is a pre-dispatch evaluation protocol. The Lead inspects compiled prompts against six critical dimensions to prevent dispatching incomplete, ambiguous, or dangerous instructions.
 
-## Disposition
+## 2. Evaluation dimensions
 
-```text
-READY
-NOT_READY
-ESCALATE
-```
+1. **Objective clarity**: Is the success predicate boolean and verifiable?
+2. **Context hygiene**: Are context references minimal, authoritative, and free of bulk code dumps?
+3. **Boundary rigor**: Are `allowed_paths`, `readonly_paths`, and `forbidden_paths` explicitly declared?
+4. **Deliverable completeness**: Are all expected files, schemas, migrations, and documentation items enumerated?
+5. **Anti-near-miss protection**: Are non-counting outcomes defined to block superficial completion claims?
+6. **Verifiability**: Are exact test commands and expected exit codes specified?
 
-## Critical checks
+## 3. Quality Gate evaluation matrix
 
-Bất kỳ mục applicable nào FAIL → `NOT_READY`:
+| Gate Check | Evaluation Criterion | Pass Condition |
+|---|---|---|
+| G-1: Objective | Success predicate is defined and measurable | Yes / No |
+| G-2: Boundaries | No path overlaps with active concurrent workers | Yes / No |
+| G-3: Resources | All sequence numbers, ports, and routes are pre-allocated | Yes / No |
+| G-4: Contracts | Prerequisite upstream interface contracts are frozen | Yes / No |
+| G-5: Verification | Commands are discovered from repository truth (no assumed tools) | Yes / No |
+| G-6: Escalation | Triggers for halting and filing Decision Requests are explicit | Yes / No |
 
-- [ ] Role có authority boundary rõ.
-- [ ] Objective là outcome đo/quan sát được.
-- [ ] Success predicate phân biệt complete với near miss.
-- [ ] Source-of-truth/inputs có thể xác định.
-- [ ] Context đủ nhưng không chứa unrelated bulk đáng kể.
-- [ ] Scope/ownership rõ.
-- [ ] Shared resources được allocate hoặc xác nhận không applicable.
-- [ ] Hard constraints operational và không mâu thuẫn.
-- [ ] Expected outputs enumerable.
-- [ ] Non-counting outcomes bao phủ near miss quan trọng khi task có rủi ro.
-- [ ] Verification tạo evidence và map đúng candidate/task identity.
-- [ ] Stop/escalation conditions rõ.
-- [ ] Output contract có schema hoặc trường bắt buộc.
-- [ ] Không còn placeholder/unresolved ambiguity critical.
-- [ ] Không có instruction từ untrusted data được nâng lên authority.
+## 4. Gate disposition
 
-## Semantic review
+- **`READY`**: All criteria satisfied. Approved for immediate dispatch.
+- **`NOT_READY`**: Deficiencies detected. The Lead must recompile the prompt.
+- **`ESCALATE`**: Architectural contradictions detected. Escalate to the project authority.
 
-Hỏi thêm:
-
-1. Agent có thể đạt “PASS” bằng cách bỏ sót một layer không?
-2. Agent có thể chạy test trên artifact khác candidate không?
-3. Agent có thể dùng resource/path chưa cấp để lách scope không?
-4. Prompt có ép implementation technique không cần thiết làm giảm adaptability không?
-5. Có instruction nào chỉ lặp lại cùng invariant bằng nhiều wording gây noise không?
-6. Prompt có yêu cầu persistence nhưng thiếu matching verification gate không?
-7. Context có stale summary nào chưa revalidate không?
-
-## Red-Team check cho task đắt/rủi ro
-
-```text
-How could a capable agent satisfy the literal wording while violating the intended outcome?
-```
-
-Lead phải xử lý mọi loophole credible bằng một trong các cách sau:
-
-- sharpen success predicate;
-- add non-counting outcome;
-- add evidence requirement;
-- move runtime-critical invariant ra harness/control plane;
-- resolve authority ambiguity trước dispatch.
-
-## Output
-
-Dùng `templates/prompt-quality-report.md`.
+Never dispatch a prompt evaluated as `NOT_READY` or `ESCALATE`.

@@ -1,27 +1,27 @@
-# Scenario: Zombie Agent Returns
+# Scenario: Zombie Agent Returns After Reassignment
 
 ## Trigger
-Worker cũ quay lại sau khi WP đã reassigned.
+A crashed or timed-out worker resumes execution and submits a completion report after a replacement worker has been dispatched.
 
 ## Risk
-Stale commits/messages có thể ghi đè work mới.
+Overwriting valid recovery work with stale or corrupted state.
 
 ## Evidence
-Assignment generation; message generation; current owner.
+Incoming report generation counter is lower than active ledger generation.
 
 ## Immediate Action
-Reject stale generation output.
+Reject the submission immediately based on generation fencing.
 
 ## Forbidden Response
-Không merge vì “agent cũ đã hoàn thành nhiều hơn”.
+Never accept outputs from an expired generation simply because tests appear to pass.
 
 ## Recovery Procedure
-Nếu artifact hữu ích, treat như external candidate và reconcile qua explicit new task, không overwrite state.
+Terminate the zombie worker process. Confirm active worker holds the current generation counter.
 
 ## Exit Criteria
-Canonical WP state chỉ nhận current generation.
+Only outputs from the active generation counter enter the audit queue.
 
 ## Example Lead Response
 ```text
-Generation 2 return sau generation 3: report STALE_GENERATION.
+Rejected submission from Worker-2 (Generation 1). Active generation is 2. Zombie output discarded.
 ```

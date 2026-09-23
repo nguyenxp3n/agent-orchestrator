@@ -1,28 +1,28 @@
-# Chương 2: Tiếp nhận dự án và lập kế hoạch tổng thể
+# Chapter 2: Project Intake, Work Packages, and DAG Planning
 
-## 2.0 Project-Agnostic Intake Rule
+## 2.0 Project-Agnostic intake rule
 
-Không bắt đầu decomposition bằng cách copy cấu trúc từ project khác. Lead phải xác định project type, authoritative inputs, toolchain, module boundaries, verification commands và semantic resources từ repository đang nhận. `docs/`, `spec/`, `plan/`, `workflow/` là các category đầu vào; file/folder thật có thể mang tên khác.
+Never begin work package decomposition by copying arbitrary conventions from another project. The Lead discovers the target project type, authoritative documents, build systems, module boundaries, verification commands, and shared semantic resources directly from the assigned repository. Labels like `docs/`, `spec/`, `plan/`, and `workflow/` indicate informational categories; actual files and directories may use different names.
 
-Nếu project không có DB thì bỏ migration allocation. Nếu không có frontend thì không tạo frontend WP. Nếu là mobile, CLI hoặc distributed system thì ownership matrix phải phản ánh screens/modules/commands/protocols/resources thực tế.
+If the project has no database, omit migration allocations entirely. If the project lacks a frontend, do not construct frontend packages. When working on mobile apps, CLI utilities, or distributed systems, the ownership matrix must reflect the actual screens, command registries, network endpoints, or protocol schemas present in that codebase.
 
-## 2.1 Mục tiêu của Project Intake
+## 2.1 Objectives of Project Intake
 
-Không dispatch agent khi Lead chưa hiểu repository đủ để biết source of truth nằm đâu, project build/test thế nào, module boundaries ra sao, resource nào là shared hotspot và unknown nào có thể làm vỡ planning. Intake không phải đọc mọi dòng code; nó là quá trình tạo **Project Execution Profile** dựa trên evidence.
+Never dispatch coding agents before understanding where authority resides, how the project builds and tests, where module boundaries lie, which files are shared integration hotspots, and what unknowns might derail planning. Intake does not require reading every line of source code; it produces an evidence-backed **Project Execution Profile**.
 
-## 2.2 Bước 1: Phân tích ngữ cảnh
+## 2.2 Step 1: Context discovery
 
-Ưu tiên đọc:
+Examine project inputs in order of priority:
 
-1. Project instructions: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, contribution docs.
-2. `docs/`, `spec/`, `plans/`, ADRs, API schemas.
-3. Repository tree và module manifests.
-4. Toolchain: package/build files, task runners, lockfiles.
-5. DB/migrations/env samples.
-6. Tests và CI/CD.
-7. Git history gần đây khi cần hiểu conventions hoặc in-flight migrations.
+1. Repository guidelines: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `CONTRIBUTING.md`.
+2. Specifications: `docs/`, `spec/`, `plans/`, ADRs, and OpenAPI or Protobuf schemas.
+3. Code structure: repository file tree and module manifests.
+4. Toolchain definitions: package manifests, build scripts, task runners, lockfiles.
+5. Data definitions: database migrations, schema definitions, and environment templates.
+6. Verification suites: unit tests, integration tests, and CI/CD pipelines.
+7. Recent Git history: recent commits to identify conventions and in-flight migrations.
 
-Evidence discovery mẫu:
+Baseline discovery commands:
 
 ```bash
 pwd
@@ -32,158 +32,92 @@ find . -maxdepth 2 -type f | sort
 find . -maxdepth 4 -type f | sort
 ```
 
-Nếu project lớn, inventory theo module thay vì dump mọi file vào context.
+For large monorepos, catalog components by module rather than loading every source file into the context window.
 
-## 2.3 Từ facts sang Project Execution Profile
+## 2.3 Compiling the Project Execution Profile
 
-Profile phải trả lời: kiến trúc/module chính; commands canonical; source authority theo subject; shared integration hotspots; semantic resources; generated/read-only files; frozen contracts; baseline failures; unknowns block planning.
+The execution profile documents:
+- Primary architecture patterns and core modules
+- Canonical build, lint, and test commands
+- Authoritative documentation by subject matter
+- Shared integration hotspots
+- Semantic resources (ports, routes, database tables)
+- Generated or read-only files
+- Frozen interfaces and API contracts
+- Pre-existing baseline failures
+- Critical unknowns blocking dispatch
 
-Không serialize secrets để “chứng minh” `.env` tồn tại. Chỉ record path và policy.
+Never include raw credentials or secrets in project documentation. Record file paths and credential policies only.
 
-## 2.4 Bước 2: Bóc tách module thành Work Package
+## 2.4 Step 2: Work Package decomposition
 
-WP là đơn vị nhỏ nhất có thể **giao, audit và accept độc lập**. Một WP tốt có outcome rõ, boundary rõ và acceptance rõ.
+A Work Package (WP) is the smallest deliverable unit that can be **dispatched, audited, and merged independently**. An effective package defines clear deliverables, strict boundaries, and explicit acceptance criteria.
 
 ```text
-Bad:  WP: Implement the whole platform
-Good: WP-A Domain A implementation + assigned resources + tests
-      WP-B Client/consumer integration + tests (only if required)
-      WP-C Freeze shared contract used by A/B
+Bad:  WP: Implement user management platform
+Good: WP-A User domain service implementation, allocated resources, and unit tests
+      WP-B User interface views and integration tests (dependent on WP-A contract)
+      WP-C Freeze shared user authentication contract consumed by WP-A and WP-B
 ```
 
-Không tách quá nhỏ đến mức mọi worker buộc phải cùng sửa một file trung tâm. Decomposition tối ưu **safe parallelism**, không tối đa số agent.
+Avoid decomposing tasks so granularly that multiple workers must edit the same central bootstrap file simultaneously. Decomposition optimizes for **safe parallelism**, not sheer agent quantity.
 
 ## 2.5 Ownership Matrix
 
-Trước parallel wave, lập Code Ownership Matrix:
+Before dispatching parallel workers, compile the Code Ownership Matrix:
 
 | WP | allowed_paths | readonly_paths | integration-only | semantic resources |
 |---|---|---|---|---|
 | WP-A | `<domain-a-path>/**`, allocated resource R1 | `<frozen-contract>` | `<integration-hotspot>` | `<domain-a-resource>` |
 | WP-B | `<client-or-consumer-path>/**` | `<frozen-contract>` | `<global-registration-hotspot>` | contract consumer |
-| WP-C | `<infra-or-platform-path>/**` | service/runtime manifests | `<shared-schema-or-domain-hotspot>` | assigned ports/resources |
+| WP-C | `<infra-or-platform-path>/**` | service manifests | `<shared-schema-or-domain-hotspot>` | assigned ports/resources |
 
-Ownership không chỉ là paths. Hai workers có thể sửa file khác nhau nhưng collision trên cùng API route hoặc env var.
+Ownership encompasses more than directory paths. Two workers editing separate files can still collide on identical API routes, database tables, or environment variable keys.
 
-## 2.6 Bước 3: Xây Dependency DAG
+## 2.6 Step 3: Constructing the Dependency DAG
 
-Phân dependencies:
+Classify dependencies systematically:
 
-- Hard dependency: downstream chưa thể bắt đầu.
-- Contract dependency: có thể chạy khi contract đã freeze.
-- Soft dependency: hữu ích nhưng không block.
-- Integration dependency: ảnh hưởng merge order/cross-WP gate.
+- **Hard dependency**: Downstream work cannot commence until upstream implementation finishes.
+- **Contract dependency**: Downstream work can proceed in parallel once interface contracts are frozen.
+- **Soft dependency**: Helpful context that does not strictly block execution.
+- **Integration dependency**: Dictates merge sequencing and cross-package testing order.
 
 ```text
-WP-0 Freeze shared contract(s)
-  |------> WP-A Domain implementation
-  |------> WP-B Consumer/client implementation
-  |------> WP-C Platform/integration dependency
+WP-0 Freeze shared contracts
+  |------> WP-A Domain service implementation
+  |------> WP-B Consumer client implementation
+  |------> WP-C Platform infrastructure configuration
 
 WP-A + WP-B + WP-C
   |
   v
-WP-Z Cross-WP Integration/E2E
+WP-Z Cross-Package Integration and End-to-End Verification
 ```
 
-Nếu shared contract chưa freeze mà producer/consumer workers cùng tự đoán interface, đó là deferred conflict chứ không phải parallelism.
+If producer and consumer workers implement complementary sides of an unverified interface without a frozen contract, they create deferred integration conflicts rather than genuine parallel progress.
 
-## 2.7 Chọn parallel waves
+## 2.7 Scheduling parallel execution waves
 
-Một WP chỉ vào cùng wave khi:
+A Work Package enters an active parallel wave only when:
 
 ```text
-all hard deps satisfied
-AND no overlapping exclusive path ownership
-AND no exclusive resource collision
-AND required contracts frozen
-AND workspace available
-AND verification commands known enough
+all hard dependencies are satisfied
+AND no overlapping write permissions exist with active workers
+AND no shared resource collisions exist
+AND required interface contracts are frozen
+AND isolated workspaces are provisioned
 ```
 
-Ví dụ 6-agent project-neutral:
+If safety guarantees cannot be demonstrated, serialize the execution sequence.
 
-```text
-Wave 0: Contract/architecture freeze
-Wave 1 parallel:
-  A1 Domain A                Resource Slot R1
-  A2 Domain B                Resource Slot R2
-  A3 Domain C                Resource Slot R3
-  A4 Client/Consumer         Resource Slot R4 or contract-consumer only
-  A5 Infrastructure         isolated infra ownership
-  A6 CI/CD                  workflow-only ownership
-Wave 2: sequential integration by DAG + global QA
-```
+## 2.8 Step 4: Workspace provisioning
 
-A5 phát hiện cần một shared resource ngoài allocation không tự tạo/claim; phải gửi request. Với DB project resource đó có thể là migration slot, nhưng framework không giả định DB.
-
-## 2.8 Bước 4: Cấp phát Git Worktree / Workspace
-
-Với Git:
+Use Git worktrees to isolate parallel agents:
 
 ```bash
 git worktree add ../wt-wp210 -b feat/wp-210
 git worktree add ../wt-wp220 -b feat/wp-220
-git worktree list
 ```
 
-Mỗi coding worker có working tree riêng. Không dùng một working tree rồi chỉ bảo agents “đừng đụng nhau”. Isolation phải vật lý hoặc được harness enforce.
-
-Nếu không thể dùng worktree: separate clone; per-agent remote workspace; per-agent container/VM; docs-only có thể dùng isolated directory.
-
-## 2.9 Baseline và branch identity
-
-Trước dispatch ghi:
-
-```text
-wp_id
-branch
-worktree_path
-base_sha
-assignment_generation
-allowed/readonly/forbidden
-resource leases
-verification commands
-```
-
-Base SHA cần cho audit diff và main drift detection.
-
-## 2.10 Expected Files là một phần của planning
-
-Đừng đợi audit mới nghĩ file nào phải tồn tại. WP planning phải liệt kê expected outputs theo tầng:
-
-```text
-Project-specific persistence/schema: required artifact(s) if the project has them
-Domain implementation: modules/services/types/tests
-Client/consumer surface: UI, SDK, CLI registration, mobile screen, adapter or equivalent if required
-Contracts: frozen API/proto/schema/interface as applicable
-Docs: update only if WP requires
-```
-
-Expected files giúp bắt “half-complete” mà tests không bắt được.
-
-## 2.11 Planning khi docs không hoàn chỉnh
-
-Adaptive procedure:
-
-1. Inventory facts từ code/manifests/CI.
-2. Tách `FACT`, `INFERENCE`, `UNKNOWN`.
-3. Chỉ dùng inference low-risk để planning; protected ambiguity thành DR.
-4. Không invent architecture vì docs thiếu.
-5. Thu hẹp WP nếu boundary chưa đủ chắc.
-
-## 2.12 Dispatch Gate
-
-```text
-[ ] Objective rõ
-[ ] Dependency state rõ
-[ ] allowed/readonly/forbidden rõ
-[ ] shared resources đã cấp phát
-[ ] expected outputs rõ
-[ ] acceptance commands discover được
-[ ] stop/DR conditions rõ
-[ ] isolated workspace có thật
-[ ] base SHA được ghi
-```
-
-Nếu một mục critical là `UNKNOWN`, WP chưa `READY`.
+When worktrees are unsupported, provision isolated repository clones, containers, or dedicated remote workspaces. Never permit two active coding agents to write to the same working tree concurrently.

@@ -1,26 +1,9 @@
 # Template: Resource Allocation Registry
 
-## Allocation Table
-
-| Resource ID | Type | Value/Slot | Owner WP | Mode | Status | Evidence/Notes |
+| Resource ID | Resource Type | Owner WP | Mode | Value / Sequence Slot | Status | Notes |
 |---|---|---|---|---|---|---|
-| MIG- | migration | | | ALLOCATED_WRITE | reserved | |
-| PORT- | port | | | ALLOCATED_WRITE | reserved | |
-| DB- | table/schema | | | EXCLUSIVE_WRITE | active | |
-| ROUTE- | route namespace | | | EXCLUSIVE/contract | active | |
-| EVENT- | event/schema | | | contract | frozen | |
-
-## Rules
-
-- Không lưu secret value; chỉ lưu identifier/policy.
-- Consumed migration/schema identifiers không recycle tùy tiện.
-- Reassignment của agent không tự động đổi owner WP.
-- Resource mới cần `RESOURCE_REQUEST`/DR nếu có nguy cơ collision.
-
-## Allocation Check
-
-```text
-Duplicate active exclusive lease: NONE / list
-Unallocated resource requested: NONE / list
-Stale owner generation: NONE / list
-```
+| RES-MIG-01 | DB Migration | WP-210 | ALLOCATED_WRITE | `000021_create_reviews.sql` | RESERVED | Assigned to auth domain |
+| RES-MIG-02 | DB Migration | WP-220 | ALLOCATED_WRITE | `000022_add_ratings.sql` | RESERVED | Assigned to review domain |
+| RES-PORT-01| Network Port | WP-300 | EXCLUSIVE_WRITE | `8081` | ACTIVE | Auth service local port |
+| RES-ROUTE-1| API Route | WP-100 | FROZEN_CONTRACT | `/api/v1/reviews/*` | FROZEN | Defined in OpenAPI spec |
+| RES-ENV-01 | Env Variable | WP-210 | EXCLUSIVE_WRITE | `AUTH_SERVICE_JWT_SECRET` | RESERVED | Secret policy applied |

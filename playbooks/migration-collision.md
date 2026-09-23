@@ -1,18 +1,11 @@
-# Playbook: Migration Collision
+# Playbook: Database Migration Collision
 
 ## Trigger
-Hai branches dùng cùng migration ID hoặc một worker cần thêm migration chưa được cấp.
+Two branches generate migrations with identical sequence numbers or conflicting schema changes.
 
-## Immediate Action
-Dừng affected integration. Xác định slot owner từ Resource Registry; không tự renumber bằng cảm tính.
-
-```bash
-find migrations -maxdepth 1 -type f | sort
-git diff <base>...HEAD -- migrations/
-```
-
-## Resolution
-Giữ slot của owner hợp lệ; cấp slot mới cho WP khác; cập nhật filenames/references/tests; kiểm dependency ordering; candidate đổi phải re-audit.
-
-## Exit Criteria
-Không duplicate ID, dependency sequence hợp lệ, up/down semantics pass, audit mới bind đúng SHA.
+## Procedure
+1. **Halt integration**: Block merging for both candidate branches.
+2. **Validate assigned slots**: Check the Resource Registry to identify which package owned the allocated slot.
+3. **Reassign sequence number**: Assign the next sequential migration slot to the unassigned package.
+4. **Update candidate branch**: The affected worker updates its migration filename and internal references.
+5. **Re-audit modified candidate**: Re-execute migration upgrade and downgrade test suites, capture the new commit SHA, and conduct a fresh audit.

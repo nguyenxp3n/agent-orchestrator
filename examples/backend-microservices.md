@@ -1,31 +1,25 @@
-# Example: Backend Microservices
+# Example: Backend Microservices with Protobuf Contracts
 
-## Intake
+## Objective
+Implement inter-service communication across independent services while enforcing backward compatibility on Protobuf definitions and message queues.
 
-Discover service boundaries, proto/OpenAPI/event schemas, database ownership, message broker topics, local integration environment và CI commands.
-
-## Work Packages
-
+## Dependency DAG
 ```text
-WP-CONTRACT: freeze proto/events
-WP-USER: user service changes
-WP-BILLING: billing service changes
-WP-NOTIFY: notification consumer
-WP-MIGRATIONS: schema slots per database owner
-WP-INTEGRATION: contract/E2E
+WP-100 Proto Contract Freeze
+  +--> WP-210 Order Service -------+
+  +--> WP-220 Payment Service -----+--> WP-500 Cross-Service E2E
+  +--> WP-230 Notification Service +
 ```
 
-## Semantic Ownership
-
-Paths có thể độc lập nhưng event names và protobuf messages là shared contracts. Đặt schema files read-only/frozen cho workers; contract change phải qua DR/WP-CONTRACT.
-
-## Verification
-
-```bash
-go test ./...
-# or project equivalent
-<contract-compatibility-check>
-<service-integration-test>
+## Boundary and Resource Allocation
+```text
+WP-100: proto/** (Frozen contracts)
+WP-210: services/order/**, Port 8081, Queue `order.events`
+WP-220: services/payment/**, Port 8082, Queue `payment.events`
+WP-230: services/notification/**, Port 8083, Consumer only
 ```
 
-Không bắt Docker nếu project dùng testcontainers, local services hay remote ephemeral environment. Evidence level phải nói rõ environment nào đã được kiểm.
+Central API gateway configurations and service discovery manifests are designated `INTEGRATION_ONLY`.
+
+## Verification Protocol
+Each service executes isolated unit and contract mock tests. The Integrator applies sequential merges, validates Protobuf wire compatibility, and executes end-to-end integration tests using localized network bridges.

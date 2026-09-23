@@ -1,85 +1,37 @@
-# 04: Constraint & Boundary Design
+# 04: Constraint and Boundary Design
 
-## Mục tiêu
+## 1. Principles of boundary enforcement
 
-Constraints phải bảo vệ invariants và quyền sở hữu, không biến prompt thành danh sách cấm dài vô tận.
+Autonomous coding agents naturally expand their scope when encountering minor friction. A worker tasked with writing an API handler will modify routing manifests, database connection pools, global styles, or third-party dependencies unless strictly bounded.
 
-## Path boundaries
+Constraint design establishes **immutable perimeter envelopes** that allow autonomous problem-solving within assigned directories while blocking uncoordinated modifications to shared infrastructure.
 
-```text
-ALLOWED_PATHS    = vùng được write/delete/rename
-readonly_paths / READONLY_PATHS = được đọc để hiểu, không sửa
-forbidden_paths / FORBIDDEN_PATHS = tuyệt đối không chạm trong WP hiện tại
+## 2. Defining permission envelopes
+
+Every worker assignment must declare three mutually exclusive path categories:
+
+```yaml
+allowed_paths:
+  - services/review/internal/**
+  - services/review/tests/**
+readonly_paths:
+  - packages/contracts/review.yaml
+  - docs/architecture/review-service.md
+forbidden_paths:
+  - services/api/router.go
+  - db/migrations/**
+  - .github/workflows/**
 ```
 
-Nếu project không dùng filesystem ownership, thay bằng equivalent domain boundaries: package/module/service/schema/resource.
+- **`allowed_paths`**: Exclusive write, creation, and deletion permissions within the assigned boundary.
+- **`readonly_paths`**: Immutable reference material for interfaces, types, and architectural standards.
+- **`forbidden_paths`**: Protected global hotspots, shared infrastructure, and directories owned by concurrent workers.
 
-## Semantic resources
+## 3. The fail-closed constraint model
 
-Path isolation không đủ cho shared resources. Compile allocation cho những loại thực sự tồn tại trong project:
+Apply a fail-closed policy: any path not explicitly listed in `allowed_paths` is prohibited by default.
 
-- migration/version slot;
-- network port;
-- route/endpoint namespace;
-- database table/schema;
-- event/topic name;
-- environment variable namespace;
-- feature flag;
-- deployment target;
-- shared generated registry.
-
-Không invent resource type chỉ vì framework có ví dụ.
-
-## Constraint taxonomy
-
-### Hard invariant
-
-Vi phạm làm invalid work:
-
-- không sửa forbidden paths;
-- không tự allocate shared resource;
-- không đổi frozen public contract;
-- không dùng secret khác trust domain;
-- không merge protected branch.
-
-### Quality constraint
-
-Định nghĩa bar:
-
-- theo project conventions;
-- tests phải chứng minh behavior;
-- maintain backward compatibility nếu contract yêu cầu.
-
-### Preference
-
-Có thể linh hoạt nếu trade-off tốt hơn:
-
-- naming style ở local helper;
-- cách chia internal function;
-- implementation technique nằm trong ownership.
-
-Không nâng preference thành hard rule nếu không có lý do.
-
-## Explain the why khi hữu ích
-
-Một constraint khó đoán nên kèm rationale ngắn:
-
-```text
-Do not reuse the staging signing secret in test environments because the trust domains must remain isolated.
-```
-
-Rationale giúp model generalize khi gặp case chưa liệt kê.
-
-## Scope extension
-
-Nếu task bắt buộc vượt `allowed_paths` hoặc resource allocation:
-
-```text
-STOP affected change
--> describe necessity
--> identify requested path/resource
--> explain architectural impact
--> send Decision/Resource/Integration Request
-```
-
-Không “sửa tạm rồi báo sau”.
+When an implementation requires touching a file outside `allowed_paths`:
+1. The worker must immediately halt modifications on that component.
+2. The worker files an explicit Decision Request, Scope Expansion Request, or Integration Request.
+3. The worker must not apply temporary workarounds or bypass constraints under the assumption that changes will be cleaned up later.

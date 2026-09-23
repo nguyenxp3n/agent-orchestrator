@@ -1,24 +1,24 @@
-﻿# 01: Prompt Anatomy: từ Prompt 5 phần đến Agent Execution Contract
+# 01: Prompt Anatomy: From 5-Part Prompts to Agent Execution Contracts
 
-## 1. Công thức nền
+## 1. Baseline prompt formula
 
-Một prompt thông thường có thể bắt đầu từ năm thành phần:
+A routine task prompt often begins with five standard components:
 
 ```text
 ROLE + CONTEXT + TASK + FORMAT + CONSTRAINTS
 ```
 
-- Role: agent đang đóng vai trò gì và có thẩm quyền đến đâu.
-- Context: sự thật nền cần thiết để hiểu nhiệm vụ.
-- Task: kết quả phải tạo ra.
-- Format: hình dạng đầu ra.
-- Constraints: giới hạn không được vượt qua.
+- Role: The persona and operational scope assigned to the agent.
+- Context: Background information required to interpret the task.
+- Task: The deliverable output the agent must produce.
+- Format: The expected structure of the return payload.
+- Constraints: Boundaries that must not be violated.
 
-Công thức này tốt cho tác vụ ngắn. Với coding agent hoặc multi-agent orchestration, nó chưa đủ để chống scope drift, false completion và resource collision.
+This formula works for small, self-contained tasks. In multi-agent software engineering, however, it fails to prevent scope drift, false completion claims, and resource collisions.
 
-## 2. Agent-grade contract
+## 2. Agent-grade execution contract
 
-Agent Orchestrator mở rộng thành:
+Agent Orchestrator expands the baseline formula into an enforceable execution contract:
 
 ```text
 ROLE
@@ -38,88 +38,84 @@ ROLE
 
 ### Role
 
-Role phải xác định **trách nhiệm và ranh giới quyền hạn**, không chỉ persona trang trí.
+A role must define **operational responsibilities and authority limits**, not decorative personas.
 
-Yếu:
-
+Weak:
 ```text
-Bạn là senior developer giỏi.
+You are a brilliant senior full-stack developer.
 ```
 
-Mạnh:
-
+Strong:
 ```text
-Bạn là Scoped Coding Worker của WP-210. Bạn chỉ triển khai artifact trong ownership envelope đã cấp; không tự merge, không tự mở scope, không tự tuyên bố ACCEPTED.
+You are the Scoped Coding Worker for WP-210. You implement artifacts strictly within your assigned ownership envelope. You do not merge code, you do not expand scope, and you never mark tasks as ACCEPTED.
 ```
 
 ### Objective
 
-Mô tả outcome, không mô tả hoạt động mơ hồ.
+Define outcomes directly rather than describing generic activity:
 
 ```text
-OBJECTIVE: tạo endpoint idempotent đáp ứng contract đã frozen và có regression test chứng minh duplicate request không tạo record thứ hai.
+OBJECTIVE: Implement an idempotent endpoint satisfying the frozen contract, accompanied by regression tests proving duplicate requests do not create duplicate database records.
 ```
 
 ### Success Predicate
 
-**Success Predicate** là điều kiện có thể kiểm chứng để phân biệt DONE thật với “có vẻ xong”.
+The **Success Predicate** provides a verifiable boolean condition distinguishing genuine completion from conversational near-misses:
 
 ```text
 SUCCESS_PREDICATE:
-- expected artifact tồn tại;
-- contract tests pass;
-- duplicate replay test pass;
-- diff không vượt allowed_paths;
-- không dùng resource ngoài allocation.
+- Expected deliverable files exist on disk
+- Contract test suite passes
+- Replay test for duplicate requests passes
+- Git diff strictly respects allowed_paths
+- No unallocated semantic resources are consumed
 ```
 
 ### Non-Counting Outcomes
 
-Liệt kê các near-miss dễ bị agent trả thay cho kết quả thật.
+List plausible near-misses that workers frequently substitute for actual technical delivery:
 
 ```text
 NON_COUNTING_OUTCOMES:
-- chỉ viết backend trong khi WP yêu cầu client artifact;
-- test unit pass nhưng canonical quality gate chưa chạy;
-- mô tả giải pháp thay vì tạo artifact;
-- “blocked by spec” khi spec thực tế đã resolve;
-- dùng workaround ngoài ownership để làm test xanh.
+- Implementing backend logic while omitting required client integration artifacts
+- Passing unit tests while failing to run the repository quality gate
+- Describing a theoretical implementation instead of writing code files to disk
+- Claiming blockage by specifications that have already been resolved
+- Employing out-of-scope workarounds to force test suites to pass
 ```
 
 ### Verification
 
-Verification phải tạo evidence:
+Verification requires recorded evidence:
 
 ```text
-command -> exit code -> artifact/log -> criterion
+command -> exit code -> artifact/log trace -> acceptance criterion
 ```
 
-Không chấp nhận:
-
+Never accept conversational claims such as:
 ```text
-"Tôi đã kiểm tra và mọi thứ ổn."
+"I tested the implementation and verified that everything works properly."
 ```
 
-## 3. Prompt altitude
+## 3. Heuristic prompt altitude
 
-Prompt quá thấp cấp sẽ hard-code từng thao tác và làm agent mất khả năng thích nghi. Prompt quá cao cấp lại mơ hồ.
+Prompts that are too low-level hard-code every keystroke, eliminating an agent's ability to navigate minor obstacles. Prompts that are too high-level invite unconstrained guessing.
 
-Framework dùng **heuristic altitude**:
+The framework enforces **heuristic altitude**:
+- Lock outcomes, invariants, path boundaries, and verification criteria rigidly.
+- Prescribe step-by-step procedures only at known risk junctures.
+- Leave internal implementation details to the worker within its permitted envelope.
 
-- khóa outcome, invariants, boundaries và evidence;
-- chỉ định procedure ở những bước có rủi ro;
-- để implementation detail cho Worker trong allowed envelope.
+## 4. Positive directives first, prohibitions second
 
-## 4. Positive instructions trước, prohibitions sau
+Prioritize clear instructions on **what the agent must accomplish**. Reserve negative constraints (`FORBIDDEN`, `DO NOT`) for critical boundaries: protected branches, secrets, destructive migrations, and out-of-scope files.
 
-Ưu tiên chỉ dẫn agent **phải làm gì**. Dùng `FORBIDDEN`/`DO NOT` cho invariants thật sự quan trọng như protected branch, secrets, destructive action, forbidden paths.
+## 5. Structural scaling
 
-## 5. Cấu trúc theo mức phức tạp
+- Small tasks: Concise Markdown headings suffice.
+- Complex tasks: Partition sections clearly: `OBJECTIVE`, `CONTEXT`, `BOUNDARIES`, `VERIFICATION`, and `OUTPUT CONTRACT`.
+- Multi-layered data: Structured Markdown or XML-style tags may be used for readability, though specific formatting syntax remains an implementation choice rather than an invariant.
 
-- Tác vụ nhỏ: Markdown headers ngắn là đủ.
-- Tác vụ phức tạp: chia section rõ `OBJECTIVE`, `CONTEXT`, `BOUNDARIES`, `VERIFICATION`, `OUTPUT`.
-- Nếu nhiều lớp dữ liệu dễ lẫn, có thể dùng XML-like tags, nhưng đây là lựa chọn trình bày, không phải invariant của framework.
+## 6. Governing rule
 
-## 6. Quy tắc cuối
-
-Prompt không cần dài nhất. Prompt cần **đủ tín hiệu để agent không phải đoán những điều có thể làm sai kết quả**.
+A prompt does not need to be long. A prompt must supply **sufficient signal so that an agent never guesses on decisions that alter system behavior**.

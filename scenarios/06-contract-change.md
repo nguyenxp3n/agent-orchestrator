@@ -1,27 +1,27 @@
-# Scenario: Contract Change During Downstream Work
+# Scenario: Contract Modification During Downstream Execution
 
 ## Trigger
-Frozen API/schema/event contract thay khi consumers đang implement.
+An upstream worker alters a frozen API specification or database schema while downstream workers are implementing consumers.
 
 ## Risk
-Workers hoàn tất trên assumptions cũ.
+Downstream workers develop against obsolete contracts, guaranteeing integration failures.
 
 ## Evidence
-Contract version/SHA; downstream context versions.
+Git diff on frozen contract path in the upstream candidate branch.
 
 ## Immediate Action
-Pause affected WPs; classify breaking/non-breaking; refresh context.
+Halt all downstream workers consuming the altered contract.
 
 ## Forbidden Response
-Không để workers tiếp tục rồi sửa conflict ở cuối.
+Never allow downstream workers to complete work against deprecated interfaces.
 
 ## Recovery Procedure
-Issue new contract version/generation and reverify affected work.
+Assess contract compatibility. If breaking, publish an updated contract version, increment downstream generations, update worker contexts, and resume.
 
 ## Exit Criteria
-Downstream candidates prove compatibility with current contract.
+All downstream workers complete against the updated, verified contract.
 
 ## Example Lead Response
 ```text
-OpenAPI payload field changed: frontend/backend consumers phải refresh trước completion.
+Halting WP-220. WP-100 modified review contract schema. Recompiling WP-220 context with updated types.
 ```

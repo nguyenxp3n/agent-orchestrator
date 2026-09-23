@@ -1,47 +1,25 @@
-# Example: Project 10 Agents
+# Example: Scaled 10-Agent Enterprise Deployment
 
-## Nguyên tắc
+## Objective
+Coordinate ten concurrent agents across distinct service domains while maintaining strict isolation, deterministic integration sequencing, and Zero-Trust verification.
 
-Mười agents chỉ được dùng khi có đủ boundaries độc lập. Không chia giả tạo chỉ để đạt con số 10.
-
-## Team
-
+## Topology and Wave Scheduling
 ```text
-A1 Contract/API
-A2 Domain Backend A
-A3 Domain Backend B
-A4 Frontend A
-A5 Frontend B
-A6 Database/Migrations
-A7 Infrastructure
-A8 Test/E2E
-A9 Security/Review
-A10 CI/Integration Support
-Lead Orchestrator separate from workers
+Wave 0: WP-100 Interface Contract & Data Model Freeze
+Wave 1 (Parallel Execution):
+  - A1 Domain Service A
+  - A2 Domain Service B
+  - A3 Domain Service C
+  - A4 Domain Service D
+  - A5 Client Interface Module
+  - A6 Shared Documentation & SDK Generator
+  - A7 Infrastructure & Terraform
+  - A8 Pipeline & CI/CD
+  - A9 Dedicated Forensic Auditor
+  - A10 Integration & Hotspot Manager
 ```
 
-## Safe Waves
-
-Wave 0: A1 freeze public contracts; A6 reserve migration plan.
-
-Wave 1: A2/A3/A4/A5/A7/A10 chạy song song với non-overlapping paths/resources. A8 chuẩn bị fixtures/read-only tests nếu không sửa hotspots. A9 review architecture/security without candidate mutation.
-
-Wave 2: auditors verify each candidate; rework loops remain on original ownership.
-
-Wave 3: Integrator merges accepted WPs by DAG and runs cross-WP gates.
-
-## Resource Registry Example
-
-```text
-MIG-31 -> Domain A
-MIG-32 -> Domain B
-PORT-DEV-A -> 8121
-PORT-DEV-B -> 8122
-ROUTE-/a/* -> Contract A
-ROUTE-/b/* -> Contract B
-ROOT-ROUTER -> INTEGRATION_ONLY
-```
-
-## Concurrency Cap
-
-Nếu local machine chỉ chạy được 4 heavy services, schedule 10 logical agents nhưng tối đa 4 concurrent execution slots. Framework tối ưu safe throughput chứ không ép tất cả cùng active.
+## Operational Governance
+1. Concurrency is strictly bounded by orthogonal domain boundaries; shared resources are pre-allocated in the Resource Registry.
+2. The Dedicated Auditor maintains an active verification queue, inspecting candidates as individual workers finish.
+3. The Integration Manager maintains the sequential merge queue, running global regression test suites following every merge.

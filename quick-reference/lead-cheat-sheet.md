@@ -1,42 +1,19 @@
 # Quick Reference: Lead Cheat Sheet
 
 ## Before Dispatch
+- Complete Project Intake and Project Execution Profile.
+- Verify DAG dependencies and freeze shared interface contracts.
+- Define `allowed_paths`, `readonly_paths`, and `forbidden_paths` with zero overlaps.
+- Pre-allocate migration numbers, ports, routes, and queue topics in Resource Registry.
+- Compile prompt using Prompt Compiler; confirm Prompt Quality Gate status is `READY`.
 
-```text
-Understand project -> WP -> DAG -> ownership -> resources -> workspace -> commands
-```
+## During Execution
+- Answer in-scope questions with concrete constraints; reject out-of-scope modifications.
+- Handle specification conflicts, contract edits, and security decisions via Decision Requests.
+- If a worker crashes: freeze workspace, capture diffs, increment generation counter, and reassign.
 
-## Invariants
-
-```text
-UNKNOWN != PASS
-WORKER_DONE != ACCEPTED
-AUDITED_SHA != CHANGED_SHA
-INDEPENDENT_PASS != COMBINED_PASS
-```
-
-## Worker asks for extra scope
-
-```text
-Need? -> ownership? -> in-scope alternative? -> integration request? -> bounded grant? -> DR
-```
-
-## Worker says done
-
-```bash
-git status --short
-git rev-parse HEAD
-git diff <base>...HEAD --name-status
-```
-
-Then run target tests + global gate + expected-output checklist.
-
-## Merge
-
-```text
-Only ACCEPTED -> check audited SHA -> DAG order -> merge -> global gate -> next
-```
-
-## Say NO immediately when
-
-Unallocated migration/port; forbidden path; secret reuse across domains; destructive action without authority; stale generation; stale audit identity.
+## During Verification and Integration
+- `WORKER_DONE != ACCEPTED`. Enforce independent forensic audits on exact commit SHAs.
+- Issue actionable `REWORK` directives if any deliverable layer is missing.
+- Merge accepted branches sequentially according to the DAG. Run global QA after every merge.
+- Report actual assurance levels (`ACCEPTED`, `INTEGRATED`, `RELEASE_VERIFIED`); never claim unverified completion.

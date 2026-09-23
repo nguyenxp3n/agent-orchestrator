@@ -1,27 +1,27 @@
-# Scenario: Corrupt Coordination State
+# Scenario: Coordination State Corruption (Safe Mode)
 
 ## Trigger
-Ownership/resource/WP records mâu thuẫn đến mức không biết canonical truth.
+Registries become inconsistent, ownership boundaries overlap, or active commit tracking is lost.
 
 ## Risk
-Mỗi action mới có thể làm blast radius lớn hơn.
+System-wide breakdown of coordination leading to widespread code collisions.
 
 ## Evidence
-Git/workspaces; resource records; audit reports; active assignments.
+Contradictory entries in Ownership Matrix, missing commit references, or conflicting migration numbers.
 
 ## Immediate Action
-Enter Safe Mode, freeze mutations, reconstruct truth.
+Declare `SAFE_MODE`. Freeze all active worker dispatches and integration merges immediately.
 
 ## Forbidden Response
-Không tiếp tục dispatch vì “có thể tự hồi phục”.
+Never attempt to resolve corrupted state while workers continue active write operations.
 
 ## Recovery Procedure
-Rebuild ledger, revoke stale generations, re-audit affected candidates.
+Execute Safe Mode protocol: snapshot disk state, inspect repository commit history, rebuild registries from ground truth, re-audit candidates, and resume.
 
 ## Exit Criteria
-Canonical state consistent and independently checkable.
+Registries rebuilt and verified against disk; operations resume under updated baselines.
 
 ## Example Lead Response
 ```text
-Hai active owners cùng claim resource slot R3: freeze, reconstruct allocation history, resume only after one authoritative ownership truth.
+SAFE MODE ACTIVATED. Halting all worker dispatches. Freezing active branches. Rebuilding coordination state from repository truth.
 ```

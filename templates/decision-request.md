@@ -1,57 +1,36 @@
 # Template: Decision Request
 
-## Identity
-
 ```text
-DR_ID:
-WP_ID:
-Agent/generation:
-Status: OPEN
-Decision owner:
-```
+DR_ID: DR-<number>
+DATE: <timestamp>
+AUTHOR_ROLE: <Lead | Worker | Auditor | Integrator>
+AFFECTED_WPS: [<WP_ID>]
 
-## Question
+CONFLICT_OR_DECISION_DESCRIPTION:
+<Clear statement of the ambiguity, specification conflict, or scope expansion request>
 
-Một câu hỏi quyết định rõ ràng.
+SUPPORTING_EVIDENCE:
+- Source A: <file path, line reference, or commit>
+- Source B: <competing file path or specification excerpt>
 
-## Evidence / Facts
+IMPACT_ANALYSIS:
+- Architecture / contracts:
+- Ownership / resources:
+- Security / secrets:
+- Concurrency / DAG schedule:
 
-- Evidence path/command:
-- Fact:
-- Unknown:
-- Contradiction:
+TECHNICAL_OPTIONS:
+1. Option A: <description, advantages, risks>
+2. Option B: <description, advantages, risks>
 
-## Why Work Cannot Safely Continue
+RECOMMENDED_ACTION:
+<Preferred option with explicit rationale>
 
-Nêu impact nếu tự đoán: security, contract, scope, resource, data hoặc integration.
+FINAL_RULING:
+<Documented decision approved by human authority or Lead Arbitrator>
 
-## Options
-
-### Option A
-- Change:
-- Benefits:
-- Risks/blast radius:
-- Ownership/resource impact:
-- Verification required:
-
-### Option B
-- Change:
-- Benefits:
-- Risks/blast radius:
-- Ownership/resource impact:
-- Verification required:
-
-## Worker Recommendation
-
-Khuyến nghị được phép, nhưng không phải authority.
-
-## Lead Disposition
-
-```text
-APPROVE_OPTION | REJECT | REQUEST_MORE_EVIDENCE | ESCALATE_HUMAN
-Decision:
-Exact scope/resource grant:
-Invariants:
-Required verification:
-Downstream/context refresh impact:
+REQUIRED_ACTIONS:
+- Contracts updated:
+- Work Packages recompiled:
+- Downstream audits invalidated:
 ```

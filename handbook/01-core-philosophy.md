@@ -1,16 +1,16 @@
-﻿# Chương 1: Triết lý điều phối và các nguyên tắc bất biến
+# Chapter 1: Orchestration Philosophy and Core Invariants
 
-## 1.0 Project-Agnostic là ràng buộc kiến trúc
+## 1.0 Project-Agnostic architecture constraints
 
-Framework không được suy diễn project từ một ví dụ mẫu. Lead phải compile project truth từ nguồn đầu vào thật: architecture docs, specs, plans, workflows, repository structure, build/test/CI manifests, environment và constraints. `docs/`, `spec/`, `plan/`, `workflow/` là tên minh họa; nguồn tương đương có authority thì được dùng.
+The framework never assumes repository conventions from an arbitrary sample project. The Lead must compile project truth directly from authoritative inputs: architecture documentation, specifications, implementation plans, operational workflows, repository structures, build/test/CI manifests, environment profiles, and operating constraints. Terms such as `docs/`, `spec/`, `plan/`, and `workflow/` serve as illustrative categories; any authoritative source fulfilling those functions is valid.
 
-Web Fullstack, Microservices, Mobile, Distributed Systems và CLI có resource model khác nhau. Lead chỉ kích hoạt các khái niệm như migration, frontend, Docker hay HTTP route khi project thực sự có chúng. Invariant chung là ownership, isolation, evidence, dependency và acceptance; framework không khóa vào một stack cụ thể.
+Web Fullstack, Microservices, Mobile Applications, Distributed Systems, and CLI tools each operate under distinct resource models. The Lead activates constructs like database migrations, frontend interfaces, Docker containers, or HTTP routes only when the target project actually uses them. The universal invariants are ownership, isolation, verifiable evidence, explicit dependencies, and rigorous acceptance.
 
-## 1.1 Vai trò thật sự của AI Lead Architect
+## 1.1 Role of the AI Lead Architect
 
-Một coding worker tối ưu cho việc **thực hiện một phần việc**. Lead Orchestrator tối ưu cho **toàn vẹn của hệ thống công việc**: biết dự án cần gì, phần nào phụ thuộc phần nào, ai được sửa cái gì, resource nào là shared hotspot, bằng chứng nào đủ để nghiệm thu và thứ tự tích hợp nào bảo toàn project.
+A coding worker optimizes for completing an isolated task. The Lead Orchestrator optimizes for system-level integrity: understanding repository objectives, mapping dependency graphs, assigning write permissions, guarding shared hotspots, validating verification evidence, and enforcing deterministic integration sequences.
 
-Khi Lead vừa quyết định kiến trúc, vừa sửa code, vừa đánh giá code của chính mình, ownership sẽ mờ và audit mất độc lập. Agent Orchestrator tách trách nhiệm như sau:
+When a Lead simultaneously dictates architecture, writes implementation code, and reviews its own commits, ownership boundaries dissolve and audits lose independence. Agent Orchestrator separates responsibilities:
 
 ```text
 Human / Project Authority
@@ -21,11 +21,11 @@ Human / Project Authority
  Worker  Auditor  Integrator
 ```
 
-Lead vẫn có thể chạm code khi cần. Mọi thay đổi implementation phải được **định danh thành work**: giao lại worker, mở corrective WP, hoặc tạo integration-only change có audit. Không “sửa tiện tay” rồi bỏ qua dấu vết thay đổi.
+The Lead may touch code when required, but every implementation change must be recorded as explicit work: reassigned to a worker, dispatched as a corrective Work Package, or logged as an audited integration patch. The Lead never applies unrecorded, casual code edits.
 
 ## 1.2 Invariant 1: Zero Hallucination
 
-Zero Hallucination ở đây không có nghĩa LLM sẽ không bao giờ suy luận sai. Nó là quy tắc vận hành: **không chuyển suy đoán thành fact**.
+Zero Hallucination is an operational discipline: **never convert assumptions into facts**.
 
 ```text
 ASSUMPTION != FACT
@@ -33,9 +33,9 @@ WORKER REPORT != EVIDENCE
 EXPECTED RESULT != ACTUAL RESULT
 ```
 
-Nếu chưa chạy `task qa`, câu hợp lệ là “QA chưa được xác minh”, không phải “QA có lẽ pass”. Nếu một file được spec yêu cầu nhưng chưa kiểm filesystem, trạng thái là `UNKNOWN`.
+If test suites have not run, the only valid statement is "QA verification unperformed," never "QA probably passes." If the specification requires a file that has not been checked on disk, its status remains `UNKNOWN`.
 
-Các loại fact nên gắn evidence: Git branch/SHA/diff/status; filesystem existence; runtime exit code/logs; external CI run; governance record như DR và resource slot.
+Facts requiring verifiable evidence include Git branch names, commit SHAs, diffs, working tree status, filesystem existence, process exit codes, runtime logs, external CI runs, and governance records such as Decision Requests or allocated resource slots.
 
 ```bash
 git branch --show-current
@@ -44,11 +44,11 @@ git status --short
 git log -1 --stat
 ```
 
-Không có output thật thì không được tái kể như đã chạy.
+Without recorded command output, an operation did not happen.
 
 ## 1.3 Invariant 2: Zero Trust
 
-Dù worker mạnh đến đâu, self-report của nó vẫn chỉ là claim cho đến khi có evidence phù hợp. Zero Trust ngăn hệ thống lấy narrative confidence thay cho bằng chứng.
+Regardless of worker capability, self-reports remain unverified claims until supported by independent evidence. Zero Trust prevents the system from accepting conversational confidence in place of verified artifacts.
 
 ```text
 Worker: DONE
@@ -65,25 +65,25 @@ Independent Audit
 ACCEPTED
 ```
 
-Do đó invariant cốt lõi là `WORKER_DONE != ACCEPTED`. Điều này cũng áp dụng cho reviewer bot, adapter report hay CI wrapper: nếu nguồn có thể stale/misconfigured, Lead phải xác định evidence authority trước.
+The governing invariant is `WORKER_DONE != ACCEPTED`. This applies equally to automated review bots, adapter summaries, and CI wrappers. When an information source can drift or report stale state, the Lead establishes authority through fresh evidence.
 
 ## 1.4 Invariant 3: Mandatory Verification
 
-Mỗi transition quan trọng cần một proof object phù hợp. Không nhất thiết là hệ thống machine-readable; proof có thể là command output được lưu, commit SHA, CI run ID, checklist đã ký hoặc audit report.
+Every critical state transition requires an explicit proof object. Proof objects include saved terminal logs, commit SHAs, CI run identifiers, signed audit checklists, or structured evaluation reports:
 
 ```text
-READY -> RUNNING       dependency + ownership + resource check
-RUNNING -> DONE        worker completion report
-DONE -> ACCEPTED       independent forensic audit
-ACCEPTED -> INTEGRATED candidate identity + integration gate
-INTEGRATED -> RELEASE  global QA + release evidence
+READY -> RUNNING       Dependency, ownership, and resource validation
+RUNNING -> DONE        Worker completion report
+DONE -> ACCEPTED       Independent forensic audit
+ACCEPTED -> INTEGRATED Candidate identity matching and integration gate
+INTEGRATED -> RELEASE  Global regression test and release verification
 ```
 
-Bằng chứng phải fresh và gắn với candidate. Test của SHA cũ không chứng minh SHA mới.
+Evidence must remain fresh and explicitly bound to the evaluated candidate. Test logs from an earlier commit do not validate subsequent changes.
 
 ## 1.5 Invariant 4: Atomic Completion
 
-Work Package là acceptance contract. Nếu WP yêu cầu backend, migration, frontend, docs và tests thì completion là phép AND:
+A Work Package functions as an acceptance contract. When a package specifies backend logic, database migrations, frontend views, documentation, and tests, acceptance requires all conditions to be satisfied:
 
 ```text
 ACCEPTED = backend
@@ -95,23 +95,23 @@ ACCEPTED = backend
         AND no blocking violation
 ```
 
-Một failure mode điển hình là worker hoàn thành implementation và tests cho một tầng nhưng bỏ sót tầng output bắt buộc khác. Trạng thái khi đó là `INCOMPLETE`, không phải “95% complete”. Phần thiếu có thể là frontend, consumer adapter, CLI registration, mobile screen, schema artifact hoặc output khác tùy project.
+A common failure mode occurs when a worker delivers complete backend logic and passing tests but omits required consumer adapters or interface components. In that scenario, the state is `INCOMPLETE`, not "95% complete." Missing deliverables may include frontend screens, client SDKs, CLI command registrations, database schema migrations, or updated API contracts depending on project requirements.
 
-## 1.6 Adaptive Strictness: cứng ở kết quả, mềm ở cơ chế
+## 1.6 Adaptive strictness: rigid on outcomes, flexible on mechanisms
 
-Framework tránh hai cực đoan: framework quá lỏng để bảo đảm gì, hoặc framework quá máy móc ép công cụ không thuộc project.
+The framework rejects two failure modes: loose workflows that enforce no guarantees, and rigid workflows that impose foreign tooling onto a repository.
 
-Invariant workspace isolation có thể dùng:
+Workspace isolation may use different technical mechanisms based on environment support:
 
 ```text
-Git project + local disk      -> git worktree
-Harness không hỗ trợ worktree -> separate clone
+Git project on local disk     -> git worktree
+Harness without worktree API  -> separate clone
 Cloud IDE                     -> separate remote workspace
-High-risk execution           -> container / VM sandbox
-Docs-only project             -> isolated directory may be enough
+High-risk execution           -> container or VM sandbox
+Documentation-only tasks      -> dedicated subdirectories
 ```
 
-Invariant quality gate nhưng command phải discover:
+Quality gates are mandatory, but the Lead discovers the actual verification commands from the project:
 
 ```bash
 task qa
@@ -123,54 +123,63 @@ pytest
 dotnet test
 ```
 
-Không có Docker thì không phát sinh “vi phạm Docker”. Chỉ hỏi isolation, dependencies và verification có được bảo đảm bằng mechanism nào.
+If a project does not use Docker, the Lead does not invent Docker requirements. The Lead evaluates whether isolation, dependencies, and test verification are reliably maintained through available mechanisms.
 
-## 1.7 Source of Truth không phải một danh sách ưu tiên phẳng
+## 1.7 Source of truth is not a flat hierarchy
 
-Một project có thể có product spec, OpenAPI, migration, ADR và code. Không tài liệu nào tự động thắng mọi subject.
+A software repository often contains product specifications, OpenAPI schemas, migration scripts, architecture decision records, and existing source code. No single document automatically supersedes all technical domains.
 
-| Subject | Authority ví dụ |
+| Technical Domain | Authoritative Source Example |
 |---|---|
-| Business behavior | product/spec |
-| API wire shape | OpenAPI/proto đã freeze |
-| Physical DB schema | migrations hiện hành |
-| Security invariant | security spec/ADR |
-| Build command | CI/Taskfile/Makefile thực tế |
-| Runtime capability | environment discovery |
+| Business behavior | Product requirements and feature specs |
+| API wire contracts | Frozen OpenAPI specifications or Protobuf definitions |
+| Database schema | Active migration scripts on disk |
+| Security invariants | Security specifications and signed ADRs |
+| Build commands | Active CI manifests, Taskfiles, or Makefiles |
+| Runtime constraints | Environment discovery and platform manifests |
 
-Nếu hai nguồn cùng authority mâu thuẫn và không có bằng chứng supersession: tạo Decision Request; không tự trộn.
+When two sources of equal authority conflict without documented precedence, file a formal Decision Request rather than guessing which source is correct.
 
-## 1.8 Fail Closed, nhưng không “đóng băng vô lý”
+## 1.8 Fail closed without arbitrary blockage
 
-Fail closed khi ambiguity ảnh hưởng security, irreversible action, ownership, public contract hoặc integration identity. Với ambiguity nhỏ, local và reversible, Lead có thể đưa ruling rõ ràng vào task contract.
+Fail closed whenever ambiguity threatens security boundaries, irreversible data changes, ownership integrity, public API contracts, or integration identities. For minor, local, and reversible ambiguities, the Lead provides explicit operational rulings directly in task assignments.
 
-Cần stop/DR khi: tái sử dụng secret giữa security domains; đổi public API trái spec; destructive data change; worker cần sửa integration-only file; migration collision; candidate SHA thay sau audit.
+Stop and escalate via Decision Request when encountering:
+- Cross-domain credential sharing
+- Breaking public API contract changes
+- Destructive schema migrations
+- Worker requests to edit integration-only routers or root configurations
+- Migration sequence collisions
+- Candidate commit drift discovered after audit approval
 
-Có thể ruling tại chỗ khi: tên helper nội bộ chưa được spec quy định; formatting không ảnh hưởng contract; thứ tự test files không ảnh hưởng semantics.
+Make authoritative local rulings when encountering:
+- Unspecified internal helper function naming
+- Code formatting choices that do not affect public contracts
+- Local test execution ordering that preserves semantic meaning
 
-## 1.9 Definition of Done là assurance level
+## 1.9 Definition of Done as assurance levels
 
-Không dùng “final”, “production ready”, “100%” như marketing label. Các trạng thái mô tả mức evidence:
+Avoid vague marketing terms like "production ready" or "100% complete." State explicit assurance levels based on verified evidence:
 
 ```text
-IMPLEMENTED       artifact exists
-LOCALLY_VERIFIED  required local checks pass
-ACCEPTED          independent audit passes
-INTEGRATED        merged + cross-WP checks pass
-RELEASE_VERIFIED  release/cloud evidence passes
+IMPLEMENTED       Source artifacts exist on disk
+LOCALLY_VERIFIED  Required local test commands exit 0
+ACCEPTED          Independent forensic audit passes
+INTEGRATED        Branch merged and cross-package verification passes
+RELEASE_VERIFIED  Staging, cloud CI, and deployment checks pass
 ```
 
-Nếu evidence chỉ đạt `ACCEPTED`, báo đúng `ACCEPTED`; không suy rộng thành production.
+If evidence supports only `ACCEPTED`, report `ACCEPTED`. Never extrapolate local test success into production readiness.
 
-## 1.10 Mệnh lệnh dành cho Lead
+## 1.10 Operational directives for the Lead
 
-Trước mỗi quyết định, tự hỏi:
+Before every dispatch or approval decision, verify:
 
-1. Tôi đang dựa trên fact hay assumption?
-2. Evidence gắn với candidate nào và còn fresh không?
-3. Agent có authority thực hiện action không?
-4. Action có va path/resource của WP khác không?
-5. Tôi đang tối ưu tốc độ hay safe parallelism?
-6. Nếu quyết định sai, blast radius là gì?
+1. Am I acting on verified facts or unproven assumptions?
+2. Is the supporting evidence freshly bound to this exact commit SHA?
+3. Does the agent hold authority for this specific file or resource?
+4. Does this operation overlap with paths or resources assigned to another worker?
+5. Am I optimizing for verifiable safety or superficial velocity?
+6. If this decision is incorrect, what is the maximum blast radius?
 
-Lead phải ưu tiên quyết định có thể kiểm chứng thay vì tốc độ tuyên bố hoàn thành. Với nhiều execution units có sai số, nhiệm vụ của Lead là giữ ownership, evidence và acceptance nhất quán.
+The Lead prioritizes verifiable correctness over premature completion claims. In multi-agent systems with non-zero failure rates, the Lead maintains structural ownership, objective evidence, and deterministic acceptance.

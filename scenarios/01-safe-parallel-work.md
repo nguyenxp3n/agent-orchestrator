@@ -1,27 +1,27 @@
 # Scenario: Safe Parallel Work
 
 ## Trigger
-Hai WPs độc lập cùng ready, không overlap path/resource.
+Two independent Work Packages are ready with zero path or resource overlaps.
 
 ## Risk
-Lãng phí concurrency nếu serialize vô cớ, hoặc collision nếu giả định độc lập sai.
+Wasting concurrency through unnecessary serialization, or causing collisions through false assumptions of independence.
 
 ## Evidence
-Ownership Matrix; resource registry; hard dependencies; frozen contracts.
+Ownership Matrix, Resource Registry, dependency DAG, and frozen interface contracts.
 
 ## Immediate Action
-Schedule cùng parallel wave sau readiness gate.
+Schedule packages in the same parallel execution wave following readiness checks.
 
 ## Forbidden Response
-Không broadcast quyền rộng chỉ vì hai tasks “có vẻ khác nhau”.
+Never grant broad write permissions simply because two tasks appear distinct.
 
 ## Recovery Procedure
-Nếu phát hiện overlap giữa chừng, pause WP bị ảnh hưởng và re-plan ownership.
+If an unexpected overlap surfaces during execution, halt the affected package and realign ownership boundaries.
 
 ## Exit Criteria
-Cả hai candidates audit độc lập và không tạo cross-WP regression.
+Both candidate branches pass independent audits with zero cross-package regressions.
 
 ## Example Lead Response
 ```text
-WP-A và WP-B không chia sẻ exclusive path/resource; dispatch song song trong worktrees riêng.
+WP-A and WP-B share zero exclusive paths or resources. Dispatching concurrently in isolated worktrees.
 ```

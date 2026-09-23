@@ -1,27 +1,27 @@
-# Scenario: Main Drift
+# Scenario: Main Branch Drift After Audit
 
 ## Trigger
-Main thay giữa audit và merge.
+The main branch advances with new commits while an accepted candidate branch is awaiting integration.
 
 ## Risk
-Audit evidence dựa trên baseline cũ, combination mới chưa verified.
+Latent regressions introduced by interactions with newly merged code.
 
 ## Evidence
-Audited base SHA; current main SHA; candidate SHA.
+`git log <base>..origin/main` shows new commits since the candidate baseline.
 
 ## Immediate Action
-Block automatic promotion; rebuild/revalidate merge candidate.
+Mark earlier audit as `STALE_AUDIT_SHA`. Block direct merge.
 
 ## Forbidden Response
-Không nói candidate đã audit nên main drift không quan trọng.
+Never merge an audited candidate into an advanced main branch without re-verification.
 
 ## Recovery Procedure
-Rebase/merge current main theo policy, tạo identity mới nếu cần, rerun gates.
+Rebase candidate onto updated main or merge main into the candidate branch. Execute test gates against the new commit SHA.
 
 ## Exit Criteria
-Resulting candidate/integration evidence fresh.
+New candidate commit SHA passes forensic re-audit and enters the merge queue.
 
 ## Example Lead Response
 ```text
-Main nhận security patch sau audit WP; Integrator revalidates with patch.
+Main drifted by 2 commits. Rebasing feat/wp-210. Earlier audit invalidated. Re-executing targeted test suite against new SHA.
 ```

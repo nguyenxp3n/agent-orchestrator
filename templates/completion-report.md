@@ -1,47 +1,36 @@
 # Template: Worker Completion Report
 
-## Candidate Identity
-
 ```text
 WP_ID:
-Agent:
-Generation:
-Branch/workspace:
-Base SHA:
-HEAD SHA:
-Status: WORKER_COMPLETE_CLAIM | BLOCKED | AWAITING_DECISION
+GENERATION:
+BRANCH:
+WORKSPACE:
+BASE_SHA:
+HEAD_SHA:
+STATUS: WORKER_COMPLETE_CLAIM | BLOCKED | AWAITING_DECISION
+
+CHANGED_FILES:
+  - <path>
+
+EXPECTED_OUTPUTS_CHECKLIST:
+  - [x] <deliverable file on disk>
+
+COMMAND_EVIDENCE:
+  - command: <exact command string>
+    exit_code: 0
+    summary: <test counts and execution summary>
+
+RESOURCE_USAGE:
+  - slot: <allocated identifier>
+    action: created | modified
+
+DECISION_REQUESTS:
+  - <request id or none>
+
+INTEGRATION_REQUESTS:
+  - target_file: <shared hotspot path>
+    patch_summary: <exact route registration or bootstrap edit>
+
+UNRESOLVED_ITEMS:
+  - <known limitation or none>
 ```
-
-## Changed Files
-
-Liệt kê file add/modify/delete/rename.
-
-## Expected Outputs Self-Check
-
-| Expected output | Present? | Evidence path | Notes |
-|---|---:|---|---|
-| | | | |
-
-## Command Evidence
-
-| Command | Exit code | Result summary | Log/artifact |
-|---|---:|---|---|
-| | | | |
-
-## Resource Usage
-
-Migration slot, ports, routes, DB objects, env names, events thực sự đã dùng.
-
-## Requests / Deviations
-
-```text
-Decision Requests:
-Integration Requests:
-Scope deviations:
-Known baseline failures:
-Unresolved items:
-```
-
-## Worker Declaration
-
-“Báo cáo này là completion claim và không tự tạo trạng thái `ACCEPTED`.”

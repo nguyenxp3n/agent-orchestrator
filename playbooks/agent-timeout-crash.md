@@ -1,19 +1,19 @@
-# Playbook: Agent Timeout / Crash
+# Playbook: Agent Timeout or Crash Recovery
 
 ## Trigger
-Worker mất heartbeat, timeout, process crash hoặc provider session mất.
+A coding worker terminates unexpectedly, times out, or stops responding.
 
-## Freeze and Capture
-Không xóa workspace. Chụp `git status`, `git diff`, recent commits, leases, DRs và warnings.
-
-```bash
-git status --short
-git diff
-git log -3 --oneline
-```
-
-## Recovery
-Phân loại clean recoverable / dirty recoverable / corrupted / unsafe-unknown. Tạo Recovery Bundle, tăng assignment generation, transfer WP resources sang worker mới. Reject output từ generation cũ.
-
-## Exit Criteria
-Worker mới nhận đúng safe commit/context/resources; zombie generation fenced; acceptance criteria còn lại rõ.
+## Procedure
+1. **Preserve workspace**: Do not delete the worktree. Capture the active state:
+   ```bash
+   git status --short
+   git diff
+   git log -3 --oneline
+   ```
+2. **Catalog state**: Record uncommitted changes, modified paths, and active resource locks.
+3. **Classify status**:
+   - Clean: Work was committed cleanly up to a known commit SHA.
+   - Dirty: Uncommitted modifications exist in the working tree.
+   - Corrupted: Incomplete file writes or invalid syntax across files.
+4. **Increment generation**: Increment the `ASSIGNMENT_GENERATION` counter for this Work Package.
+5. **Dispatch recovery**: Dispatch a fresh worker with the Recovery Bundle containing captured diffs and the incremented generation counter. If the previous worker subsequently resumes, its outputs are rejected as stale.

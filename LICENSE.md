@@ -1,5 +1,5 @@
-﻿# License Notice
+# License Notice
 
-Bộ tài liệu này được phát hành để sử dụng, sao chép, sửa đổi và tích hợp vào quy trình nội bộ hoặc cá nhân. Khi phân phối bản đã sửa đổi, nên giữ thông tin phiên bản và ghi rõ thay đổi để người dùng biết phần nào là canonical AGENT-ORCHESTRATOR và phần nào là extension cục bộ.
+This documentation and operational framework is released for open use, reproduction, modification, and integration into internal workflows and personal projects. When distributing modified versions, retain attribution and clearly document adjustments to distinguish canonical standards from local customizations.
 
-Framework không cung cấp bảo đảm rằng phần mềm do agents tạo ra không có lỗi, không có lỗ hổng hoặc phù hợp với mọi môi trường production. Người vận hành vẫn chịu trách nhiệm với secrets, quyền truy cập, hạ tầng, dữ liệu và release thực tế.
+The framework provides operational methodology; it carries no warranty that generated software will be free of defects or suitable for every production environment. System operators retain full responsibility for secrets, credential security, infrastructure integrity, data governance, and release management.

@@ -1,12 +1,12 @@
-# START HERE: Chạy một phiên điều phối trong 15 phút
+# START HERE: Run an Orchestration Session in 15 Minutes
 
-Tài liệu này là đường đi ngắn nhất để bắt đầu **bất kỳ software project nào**. Framework là Project-Agnostic: không yêu cầu project phải là Web, có Docker, có database hay dùng một toolchain cụ thể.
+This guide provides the shortest path to orchestrating any software repository. The framework is strictly project-agnostic: it requires no specific language, framework, database, container runtime, or build system.
 
 ## 1. Intake project
 
-Thu thập project input: tài liệu kiến trúc (`docs/` hoặc nguồn tương đương), đặc tả (`spec/` hoặc tương đương), kế hoạch (`plan/`), quy trình (`workflow/`), repository tree, build/test manifests, CI config, schema/migration nếu project có, env examples và project instructions. Các tên thư mục trên chỉ minh họa loại nguồn cần tìm; project không phải tuân theo convention này. Ghi lại facts, unknowns và contradictions bằng [Project Intake Template](templates/project-intake.md).
+Gather project inputs: architectural references (`docs/` or equivalent), specifications (`spec/`), implementation plans (`plan/`), operational procedures (`workflow/`), repository tree, build and test manifests, CI configurations, schema definitions, environment examples, and developer guidelines. These directory names illustrate logical categories; repositories do not need to follow these exact names. Record facts, unknowns, and contradictions in the [Project Intake Template](templates/project-intake.md).
 
-Không đoán command. Lead phải discover:
+Discover commands directly from the codebase rather than assuming defaults:
 
 ```bash
 find . -maxdepth 2 -type f | sort
@@ -17,15 +17,15 @@ find . -maxdepth 3 -type f | sort
 
 ## 2. Compile Project Execution Profile
 
-Điền [Project Execution Profile](templates/project-execution-profile.md): architecture, toolchain, authoritative docs, commands, shared resources, integration hotspots, unknowns. Nếu hai tài liệu ngang quyền mâu thuẫn, trạng thái là `UNRESOLVED`, không tự hòa trộn.
+Complete the [Project Execution Profile](templates/project-execution-profile.md): architecture, toolchains, authoritative documents, commands, shared resources, integration hotspots, and unknowns. When two authoritative documents conflict, mark the status as `UNRESOLVED` and escalate rather than silently blending them.
 
-## 3. Tách Work Packages
+## 3. Decompose into Work Packages
 
-Mỗi WP phải là đơn vị có thể review độc lập. Dùng [Work Package Template](templates/work-package.md), bắt buộc có dependency, path scope, expected outputs, resources, tests, stop conditions và acceptance criteria.
+Every Work Package (WP) must represent an independently verifiable unit of delivery. Use the [Work Package Template](templates/work-package.md). Each package must define dependencies, path boundaries, expected outputs, resource allocations, test commands, stop conditions, and acceptance criteria.
 
-## 4. Dựng DAG và Ownership Matrix
+## 4. Construct DAG and Ownership Matrix
 
-Ví dụ:
+Example topology:
 
 ```text
 WP-100 Contracts
@@ -34,64 +34,64 @@ WP-100 Contracts
    |                            +--> WP-500 Integration
    +--> WP-220 Frontend Auth ---+
 
-WP-300 Infra can run parallel if it owns no shared DB/API hotspot.
+WP-300 Infra can run in parallel if it owns no shared database or API hotspots.
 ```
 
-Dùng [Ownership Matrix](templates/ownership-matrix.md) và [Resource Allocation](templates/resource-allocation.md). Phân migration slot/port trước khi dispatch.
+Define boundaries using the [Ownership Matrix](templates/ownership-matrix.md) and [Resource Allocation](templates/resource-allocation.md). Allocate migration sequence numbers, ports, and route namespaces before dispatching workers.
 
-## 5. Tạo workspace cô lập
+## 5. Provision isolated workspaces
 
-Git worktree là mặc định tốt khi project dùng Git:
+Git worktrees provide clean filesystem isolation:
 
 ```bash
 git worktree add ../wt-wp210 -b feat/wp-210
 git worktree add ../wt-wp220 -b feat/wp-220
 ```
 
-Nếu môi trường không hỗ trợ worktree, dùng clone riêng/container/remote workspace. Invariant là **không có hai active writers cùng ghi vào cùng working tree**.
+When worktrees are unavailable, use separate clones, containers, or remote workspaces. Core rule: **never allow multiple active workers to write to the same working tree simultaneously.**
 
-## 6. Compile prompt và chạy Prompt Quality Gate
+## 6. Compile prompts and run Prompt Quality Gate
 
-Điền [Prompt Compile Input](templates/prompt-compile-input.md), rồi dùng [Prompt Compiler](prompts/prompt-compiler.md) để compile prompt từ Project Truth + WP + Ownership + Resources + Acceptance. Chọn `Compact`, `Standard` hoặc `Long-Horizon` mode theo độ phức tạp.
+Populate the [Prompt Compile Input](templates/prompt-compile-input.md), then invoke the [Prompt Compiler](prompts/prompt-compiler.md) using project truth, WP contracts, ownership boundaries, allocated resources, and acceptance criteria. Select `Compact`, `Standard`, or `Long-Horizon` mode based on task complexity.
 
-Chạy [Prompt Quality Gate](prompt-engineering/07-prompt-quality-gate.md). Nếu disposition không phải `READY`, **không dispatch**.
+Evaluate the compiled prompt with the [Prompt Quality Gate](prompt-engineering/07-prompt-quality-gate.md). If the disposition is not `READY`, do not dispatch the prompt.
 
-## 7. Dispatch worker
+## 7. Dispatch workers
 
-Gửi [Worker Task Assignment Prompt](prompts/worker-task-assignment.md) đã được compile với exact objective, success predicate, context references, boundaries, resources, non-counting outcomes, verification và output contract. Lead giữ ledger về branch/worktree, generation, resources và dependency status.
+Dispatch the compiled [Worker Task Assignment Prompt](prompts/worker-task-assignment.md) containing explicit objectives, success predicates, context references, boundaries, resources, non-counting outcomes, verification steps, and output contracts. Maintain an active ledger tracking branch names, worktree paths, assignment generations, allocated resources, and dependency states.
 
-## 8. Khi worker hỏi
+## 8. Worker inquiries and escalation
 
-- Câu hỏi implementation trong scope → dùng [Clarification Guidance](prompts/clarification-guidance.md).
-- Spec/reality conflict, security decision, scope expansion → dùng [Architectural Arbitration](prompts/architectural-arbitration.md) + [Decision Request](templates/decision-request.md).
-- Worker xin file/resource thuộc WP khác → mặc định từ chối, rồi tìm phương án trong phạm vi hoặc tạo request chính thức.
+- In-scope implementation questions: respond with [Clarification Guidance](prompts/clarification-guidance.md).
+- Specification conflicts, security decisions, or scope changes: trigger [Architectural Arbitration](prompts/architectural-arbitration.md) with a [Decision Request](templates/decision-request.md).
+- Requests for files or resources owned by another WP: reject by default, explore alternatives within assigned scope, or file a formal request.
 
-## 9. Worker báo xong ≠ xong
+## 9. Worker completion claim is not acceptance
 
-Worker phải gửi [Completion Report](templates/completion-report.md). Sau đó một auditor/Lead độc lập chạy [Seven-Step Forensic Audit](checklists/seven-step-forensic-audit.md).
+Workers submit a [Completion Report](templates/completion-report.md). The Lead or an independent Auditor then runs the [Seven-Step Forensic Audit](checklists/seven-step-forensic-audit.md):
 
 ```bash
 git status --short
 git log -1 --stat
 git diff <base>...HEAD --name-status
-# chạy project-specific unit / quality commands từ Project Execution Profile
+# Run project-specific unit and quality commands from Project Execution Profile
 ```
 
-Nếu thiếu frontend/migration/docs/test theo barem, disposition là `REJECT/REWORK` dù test của phần đã làm đang xanh.
+If required frontend files, database migrations, documentation, or tests are missing, issue a `REJECT/REWORK` disposition even when isolated unit tests pass.
 
-## 10. Integrate tuần tự
+## 10. Sequential integration
 
-Candidate `ACCEPTED` mới vào queue. Merge theo DAG, không theo “ai xong trước”. Với policy cho phép merge commit:
+Only candidates marked `ACCEPTED` enter the integration queue. Merge sequentially according to the DAG, never by worker completion order. For repositories permitting merge commits:
 
 ```bash
 git merge --no-ff feat/wp-210
-# run global QA
+# Run global QA
 git merge --no-ff feat/wp-220
-# run global QA again
+# Run global QA again
 ```
 
-Nếu main thay đổi sau audit, rebase/recreate candidate và re-audit khi identity thay đổi.
+When the main branch advances after an audit, rebase the candidate, rerun verification, and re-audit before merging.
 
-## 11. Kết thúc
+## 11. Final verification
 
-Dùng [Final Project Gate](checklists/final-project-gate.md). Chỉ nói `FINAL` khi mọi critical criterion có evidence; nếu chưa thể chạy cloud/deployment, ghi rõ assurance level hiện tại thay vì nâng trạng thái bằng ngôn từ.
+Apply the [Final Project Gate](checklists/final-project-gate.md). State `FINAL` only when every critical acceptance criterion has verified evidence. When cloud deployment or staging verification cannot run locally, state the actual assurance level rather than claiming unverified completion.

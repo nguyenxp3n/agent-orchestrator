@@ -1,27 +1,27 @@
-# Scenario: Agent Crash / Recovery
+# Scenario: Agent Timeout or Crash Recovery
 
 ## Trigger
-Worker timeout/crash khi WP đang RUNNING.
+A coding worker process terminates, times out, or stops responding.
 
 ## Risk
-Mất work, duplicate work, resource leak.
+Lost work, lingering locks, or corrupted working trees.
 
 ## Evidence
-Workspace status/diff; last safe commit; leases; pending DRs.
+Process timeout logs, absent progress reports, uncommitted workspace diffs.
 
 ## Immediate Action
-Freeze workspace, capture Recovery Bundle, classify recoverability.
+Freeze the worktree. Capture uncommitted diffs and last known commit SHA.
 
 ## Forbidden Response
-Không xóa worktree hoặc trả resource về pool ngay.
+Never wipe the workspace immediately without preserving working diffs.
 
 ## Recovery Procedure
-Reassign WP với generation mới và preserved safe state.
+Construct a Recovery Bundle containing captured state. Increment `ASSIGNMENT_GENERATION`. Reassign to a fresh worker.
 
 ## Exit Criteria
-New worker tiếp tục từ safe evidence; old generation invalid.
+New worker completes the package; crashed worker's stale outputs are rejected.
 
 ## Example Lead Response
 ```text
-Agent-4 crash ở generation 2; Agent-7 nhận generation 3 với cùng allocated resource slot R2 của WP.
+Worker-2 timed out. Capturing diff in wt-wp210. Incrementing generation to 2. Dispatching fresh worker with Recovery Bundle.
 ```

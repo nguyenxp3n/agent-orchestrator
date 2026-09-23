@@ -1,21 +1,19 @@
-# Checklist: Worker Completion Claim
+# Worker Completion Checklist
 
-Trước khi worker gửi completion report:
+Workers must verify every item prior to submitting a `WORKER_COMPLETE_CLAIM`.
 
-```text
-[ ] Correct branch/workspace/generation
-[ ] All expected outputs checked one by one
-[ ] No write outside allowed_paths
-[ ] No modification of readonly/forbidden paths
-[ ] Only allocated resources used
-[ ] Target/unit tests run with actual exit codes
-[ ] Repository-required quality gate run if assigned
-[ ] git status inspected
-[ ] Changed files listed
-[ ] HEAD SHA recorded
-[ ] Decision/Integration Requests listed
-[ ] Unresolved items explicitly listed
-[ ] Report says WORKER_COMPLETE_CLAIM, not ACCEPTED
-```
+## 1. Deliverable verification
+- [ ] All expected files specified in the contract exist on disk in their designated paths.
+- [ ] Implementation satisfies the Success Predicate completely.
+- [ ] All deliverable layers (backend logic, migrations, frontend views, documentation) are present.
 
-Worker self-check giúp giảm rework nhưng không thay independent audit.
+## 2. Boundary compliance
+- [ ] `git status --short` confirms zero modifications outside `allowed_paths`.
+- [ ] Untracked files and local test caches are cleaned up.
+- [ ] No unassigned migration numbers, ports, or routes were created.
+
+## 3. Test execution
+- [ ] Targeted unit and component tests were executed directly in the workspace.
+- [ ] Repository-level quality gates were executed directly.
+- [ ] All executed commands exited with code 0.
+- [ ] Command strings, exit codes, and output summaries are recorded in the completion report.

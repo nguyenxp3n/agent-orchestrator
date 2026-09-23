@@ -1,27 +1,27 @@
-# Scenario: Combined WP Failure
+# Scenario: Combined Multi-Package Test Failure
 
 ## Trigger
-WP-A và WP-B pass riêng nhưng fail khi merged.
+Branches for Package A and Package B merge cleanly without textual conflicts, but the combined test suite fails.
 
 ## Risk
-Cross-module contract/resource mismatch.
+Deploying broken software resulting from latent integration bugs.
 
 ## Evidence
-Both audit reports; integration diff; global test failures; contracts.
+Global test suite failures following sequential merge.
 
 ## Immediate Action
-Stop queue; classify mismatch and create corrective work.
+Halt integration. Revert the last merged branch from the integration baseline.
 
 ## Forbidden Response
-Không tiếp tục merge các WPs sau để “xem có tự hết”.
+Never push forward and attempt live patches on the broken integration branch.
 
 ## Recovery Procedure
-Fix at correct ownership boundary; rerun independent + combined gates as needed.
+Isolate the semantic interaction causing the regression. Create a corrective Work Package to resolve the incompatibility.
 
 ## Exit Criteria
-Integrated SHA passes cross-WP gate.
+Clean integration branch passes full global test suite and end-to-end user journeys.
 
 ## Example Lead Response
 ```text
-Backend returns enum old value while frontend accepted against different frozen snapshot.
+Combined integration test failed on user checkout flow. Reverting WP-220 merge. Creating corrective package WP-225.
 ```

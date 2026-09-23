@@ -1,27 +1,27 @@
-# Scenario: Harness / Tool Outage
+# Scenario: External Harness or Tool Outage
 
 ## Trigger
-Agent provider, CI, Git host hoặc external tool unavailable.
+The LLM API, Git hosting platform, or CI runner environment experiences downtime.
 
 ## Risk
-Misclassify environment failure as code failure; endless retries.
+Corrupted coordination state or wasted retry budgets.
 
 ## Evidence
-Provider/CI status; local state; last checkpoint.
+HTTP 5xx error responses, network timeouts, or unreachable remote repositories.
 
 ## Immediate Action
-Preserve state, mark environment block, pause affected checks.
+Preserve local state. Mark affected verification checks as `BLOCKED_ENVIRONMENT`.
 
 ## Forbidden Response
-Không consume implementation retry budget vô hạn.
+Never fail a work package implementation due to external infrastructure downtime.
 
 ## Recovery Procedure
-Resume from checkpoint when tool returns; rerun stale evidence.
+Suspend active workers. Retain local worktrees and journals. Resume operations once external services recover.
 
 ## Exit Criteria
-No state loss; final status distinguishes UNKNOWN/BLOCKED_ENVIRONMENT from FAIL_IMPLEMENTATION.
+All affected tasks resume from verified local checkpoints.
 
 ## Example Lead Response
 ```text
-GitHub unavailable: local accepted evidence preserved, release CI remains UNKNOWN.
+CI runner unavailable. Marking CI check BLOCKED_ENVIRONMENT. Local state preserved. Pausing dispatch until service recovery.
 ```

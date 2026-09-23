@@ -1,86 +1,87 @@
-﻿# AGENT-ORCHESTRATOR Implementation Plan
+# AGENT-ORCHESTRATOR Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** Use subagent-driven development or plan execution skills to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Tạo một bộ cẩm nang Markdown module hóa, model-agnostic và project-agnostic để AI Lead Architect có thể điều phối 5–10+ coding agents an toàn, có audit và sequential integration.
+**Goal:** Create a modular, model-agnostic, and project-agnostic Markdown field manual and operational toolkit enabling an AI Lead Architect to coordinate 5 to 10+ coding agents safely through independent audits and sequential integration.
 
-**Architecture:** Sản phẩm gồm canonical handbook 7 chương và operational toolkit tách riêng: prompts, templates, checklists, playbooks, scenarios, case study, examples và quick references. Không triển khai runtime executable; mọi primitive V2 được chuyển thành giao thức, decision procedure và mẫu copy-paste.
+**Architecture:** The deliverable consists of a canonical 7-chapter handbook alongside specialized operational toolkits: role prompts, templates, checklists, incident playbooks, scenarios, case studies, examples, and quick-reference guides. It avoids executable runtime daemons; all operational primitives exist as protocols, decision trees, and copy-paste templates.
 
-**Tech Stack:** Markdown, Git, Python standard library chỉ để validation/packaging; ZIP + SHA-256 cho release artifact.
+**Tech Stack:** Markdown, Git, Python standard library strictly for validation and packaging scripts; ZIP and SHA-256 for release artifacts.
 
-**Spec:** `docs/superpowers/specs/2026-09-23-AGENT-ORCHESTRATOR-design.md`
+**Spec:** `meta/BUILD-SPEC.md`
 
 ## Global Constraints
 
-- Ngôn ngữ nội dung: tiếng Việt chuyên môn cao.
-- Model-agnostic: không phụ thuộc provider cụ thể.
-- Project-agnostic: không giả định Docker, npm, Go, Python hay một toolchain cố định.
-- Strict on outcomes/invariants; adaptive on mechanisms.
-- `WORKER_DONE != ACCEPTED` và evidence-before-acceptance là invariant.
-- Không tạo orchestration runtime hoặc control plane executable.
-- Không có các placeholder markers bị cấm trong release.
+- Content language: Professional, human-written technical English.
+- Model-agnostic: Zero proprietary lock-in to specific model providers.
+- Project-agnostic: No mandatory assumptions regarding Docker, npm, Go, or Python.
+- Strict on outcomes and invariants; adaptable on operational mechanisms.
+- `WORKER_DONE != ACCEPTED` and evidence-before-acceptance remain non-negotiable invariants.
+- No orchestration runtime or control-plane executable.
+- Zero prohibited placeholder markers in release documents.
 
 ## Review Focus
 
-1. Framework có vô tình biến Git worktree/Docker thành bắt buộc thay vì cơ chế mặc định thích ứng không?
-2. Prompt có cho phép worker tự mở rộng scope hoặc tự nhận `ACCEPTED` không?
-3. Audit có kiểm expected files/barem chứ không chỉ tests/diff không?
-4. Integration có merge theo dependency DAG và revalidate khi main/candidate drift không?
-5. Recovery có phân biệt agent state và WP state, đồng thời chặn zombie generation cũ không?
+1. Does the framework avoid making Git worktrees or Docker mandatory instead of an adaptable default mechanism?
+2. Do prompts prevent workers from autonomously expanding scope or claiming `ACCEPTED` status?
+3. Do audits inspect deliverables and rubrics rather than checking only raw test outputs or diffs?
+4. Does integration sequence branches according to dependency DAGs and trigger revalidation upon branch drift?
+5. Does failure recovery cleanly decouple agent state from Work Package state and block stale generation messages?
 
 ---
 
-### Task 1: Validation Contract và Skeleton
+### Task 1: Validation Contract and Skeleton
 
 **Files:**
 - Create: `tools/validate_framework.py`
-- Create: toàn bộ directory skeleton của package
+- Create: Complete directory skeleton for the framework package
 
 **Interfaces:**
-- Produces: validator kiểm required files, headings, forbidden placeholders, minimum prompt/scenario structure.
-- Consumes: design spec acceptance criteria.
+- Produces: Automated validator checking required files, headings, prohibited placeholders, and minimum prompt/scenario structures.
+- Consumes: Design specification acceptance criteria.
 
-- [ ] **Step 1: Viết validator trước nội dung**: required file list và semantic checks.
-- [ ] **Step 2: Chạy validator và xác nhận FAIL** vì package chưa tồn tại.
-- [ ] **Step 3: Tạo skeleton directories** nhưng chưa thêm content stubs giả.
-- [ ] **Step 4: Commit validator/skeleton.**
+- [x] **Step 1: Write validator prior to content implementation**: enforce required file lists and semantic checks.
+- [x] **Step 2: Run validator and confirm failure** on an empty package.
+- [x] **Step 3: Create skeleton directories** without placeholder stubs.
+- [x] **Step 4: Commit validator and directory skeleton.**
 
-### Task 2: Canonical Handbook 7 Chương
+### Task 2: Canonical Handbook (7 Chapters)
 
 **Files:**
-- Create: `AGENT-ORCHESTRATOR/handbook/01-core-philosophy.md`
-- Create: `.../02-project-intake-dag-planning.md`
-- Create: `.../03-resource-locking-boundaries.md`
-- Create: `.../04-ready-to-use-prompts.md`
-- Create: `.../05-zero-trust-forensic-audit.md`
-- Create: `.../06-sequential-integration-cicd.md`
-- Create: `.../07-adaptive-playbook.md`
+- Create: `handbook/01-core-philosophy.md`
+- Create: `handbook/02-project-intake-dag-planning.md`
+- Create: `handbook/03-resource-locking-boundaries.md`
+- Create: `handbook/04-ready-to-use-prompts.md`
+- Create: `handbook/05-zero-trust-forensic-audit.md`
+- Create: `handbook/06-sequential-integration-cicd.md`
+- Create: `handbook/07-adaptive-playbook.md`
 
 **Interfaces:**
-- Produces: canonical conceptual source for toolkit files.
-- Consumes: V1/V2/finalization/anonymized field-experience synthesis.
+- Produces: Canonical conceptual foundations for operational toolkit files.
+- Consumes: Synthesized insights from V1, V2, and anonymized multi-agent field experience.
 
-- [ ] **Step 1:** Viết 7 chương với command examples và decision rules.
-- [ ] **Step 2:** Chạy validator heading/coverage checks.
-- [ ] **Step 3:** Rà soát adaptive strictness và separation of duties.
-- [ ] **Step 4:** Commit handbook.
+- [x] **Step 1:** Write the 7 chapters with shell command examples and clear decision trees.
+- [x] **Step 2:** Execute validator heading and coverage checks.
+- [x] **Step 3:** Review adaptive strictness and separation of duties.
+- [x] **Step 4:** Commit canonical handbook.
 
-### Task 3: Prompt Library và Operational Templates
+### Task 3: Prompt Library and Operational Templates
 
 **Files:**
-- Create: `prompts/*.md` sáu role prompts.
-- Create: `templates/*.md` chín operational templates.
+- Create: `prompts/*.md` canonical role prompts.
+- Create: `prompt-engineering/*.md` prompt compiler modules.
+- Create: `templates/*.md` operational templates.
 
 **Interfaces:**
-- Produces: copy-paste contracts cho Lead, Worker, Auditor, Integrator, DR và reporting.
-- Consumes: handbook chapters 1–5.
+- Produces: Production-ready contracts for Lead, Worker, Auditor, Integrator, Decision Requests, and progress reporting.
+- Consumes: Handbook chapters 1 through 5.
 
-- [ ] **Step 1:** Viết prompt library với Inputs/Hard Rules/Procedure/Output Contract/Stop Conditions.
-- [ ] **Step 2:** Viết templates cho Intake, Profile, WP, Ownership, Resources, DR, Completion, Audit, Integration.
-- [ ] **Step 3:** Chạy validator prompt/template completeness.
-- [ ] **Step 4:** Commit prompts/templates.
+- [x] **Step 1:** Write prompt library with explicit inputs, hard rules, execution flows, output contracts, and stop conditions.
+- [x] **Step 2:** Write templates for Intake, Profile, Work Packages, Ownership, Resources, Decision Requests, Completion, Audits, and Integration.
+- [x] **Step 3:** Validate prompt and template structural completeness.
+- [x] **Step 4:** Commit prompts and templates.
 
-### Task 4: Checklists, Playbooks và 15 Scenarios
+### Task 4: Checklists, Playbooks, and 15 Conformance Scenarios
 
 **Files:**
 - Create: `checklists/*.md`
@@ -88,16 +89,16 @@
 - Create: `scenarios/01..15-*.md`
 
 **Interfaces:**
-- Produces: field procedures cho execution, incident và edge cases.
-- Consumes: handbook chapters 3,5,6,7.
+- Produces: Field operational procedures for execution, incidents, and edge cases.
+- Consumes: Handbook chapters 3, 5, 6, and 7.
 
-- [ ] **Step 1:** Viết pre-dispatch, completion, seven-step audit, pre-merge, final-project checklists.
-- [ ] **Step 2:** Viết playbooks cho scope, migration, Git conflict, crash, spec conflict, no-Docker, CI failure, Safe Mode và drift/audit khi cần.
-- [ ] **Step 3:** Viết đủ 15 scenario theo format chuẩn.
-- [ ] **Step 4:** Chạy scenario structural validation.
-- [ ] **Step 5:** Commit operational procedures.
+- [x] **Step 1:** Write pre-dispatch, worker completion, seven-step forensic audit, pre-merge, and final project checklists.
+- [x] **Step 2:** Write playbooks for scope expansion, migration collisions, git conflicts, crashes, spec conflicts, environments without Docker, CI failures, Safe Mode, and branch drift.
+- [x] **Step 3:** Write all 15 operational scenarios using the standardized structure.
+- [x] **Step 4:** Execute scenario structural validation.
+- [x] **Step 5:** Commit checklists, playbooks, and scenarios.
 
-### Task 5: Case Study, Examples và Quick Reference
+### Task 5: Case Studies, Examples, and Quick Reference
 
 **Files:**
 - Create: `case-studies/project-neutral-six-agent-case.md`
@@ -105,29 +106,29 @@
 - Create: `quick-reference/*.md`
 
 **Interfaces:**
-- Produces: concrete runnable mental models và starter blueprints.
-- Consumes: toàn bộ framework primitives.
+- Produces: Concrete reference models and quickstart implementation blueprints.
+- Consumes: All core framework primitives.
 
-- [ ] **Step 1:** Viết project-neutral six-agent case study từ các incident đã anonymize/generalize.
-- [ ] **Step 2:** Viết ví dụ 6-agent, 10-agent, microservices, mobile, CLI.
-- [ ] **Step 3:** Viết Lead cheat sheet, state model, decision tree, toolchain matrix.
-- [ ] **Step 4:** Commit examples/reference.
+- [x] **Step 1:** Write project-neutral six-agent case study based on anonymized field incidents.
+- [x] **Step 2:** Write architecture examples for 6-agent, 10-agent, microservices, mobile, and CLI systems.
+- [x] **Step 3:** Write Lead cheat sheet, state model guide, decision trees, and toolchain adaptation matrices.
+- [x] **Step 4:** Commit case studies, examples, and quick references.
 
-### Task 6: Entry Points, Traceability và Release QA
+### Task 6: Entry Points, Traceability, and Release QA
 
 **Files:**
 - Create: `README.md`, `START-HERE.md`, `CHANGELOG.md`, `LICENSE.md`
-- Create: `meta/BUILD-SPEC.md`, `meta/IMPLEMENTATION-PLAN.md`, `meta/FINAL-VERIFICATION-REPORT.md`
+- Create: `meta/BUILD-SPEC.md`, `meta/IMPLEMENTATION-PLAN.md`, `meta/FINAL-VERIFICATION-REPORT.md`, `meta/SOURCE-SYNTHESIS-MAP.md`
 - Create: `SHA256SUMS.txt`
-- Create: release ZIP.
+- Create: Release ZIP package.
 
 **Interfaces:**
-- Produces: navigable release package và evidence.
-- Consumes: all prior tasks.
+- Produces: Navigable release package backed by verification evidence.
+- Consumes: All prior task deliverables.
 
-- [ ] **Step 1:** Viết README/START-HERE với 15-minute workflow.
-- [ ] **Step 2:** Copy spec/plan vào meta và tạo source synthesis map.
-- [ ] **Step 3:** Chạy full validator, markdown link checks, grep placeholder scan và line-count/content checks.
-- [ ] **Step 4:** Tạo SHA256SUMS, ZIP, re-extract ZIP và chạy validator trên extracted artifact.
-- [ ] **Step 5:** Viết Final Verification Report bằng exact command/result.
-- [ ] **Step 6:** Commit release artifact metadata và tag candidate state trong git history (không push/publish).
+- [x] **Step 1:** Write `README.md` and `START-HERE.md` featuring a 15-minute quickstart workflow.
+- [x] **Step 2:** Maintain design specifications, plans, and source synthesis maps in `meta/`.
+- [x] **Step 3:** Run full validation suite, markdown link checks, and placeholder scans.
+- [x] **Step 4:** Generate `SHA256SUMS.txt`, build ZIP package, extract into clean directory, and re-run validation against extracted files.
+- [x] **Step 5:** Generate Final Verification Report documenting exact commands and results.
+- [x] **Step 6:** Localize all documentation and metadata to professional, human-written technical English.

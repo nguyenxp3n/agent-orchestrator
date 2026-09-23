@@ -1,15 +1,12 @@
-# Playbook: Environment Without Docker / Low RAM
+# Playbook: Operating in Environments Without Docker
 
 ## Trigger
-Project docs nhắc container nhưng execution environment không có Docker hoặc không đủ resource.
+The repository or test suite expects Docker, but container runtimes are unavailable or hardware resources are constrained.
 
-## Adaptation
-Xác định mục tiêu cần bảo toàn: isolation, DB/service semantics, reproducibility. Chọn local service riêng, in-memory/fake cho unit tests, remote disposable dependency, separate clone hoặc giảm concurrency.
-
-```text
-If isolation cannot be proven -> reduce parallel writers.
-If production-specific behavior cannot be reproduced -> mark that evidence UNKNOWN and block the assurance level that requires it.
-```
-
-## Exit Criteria
-Mechanism thay thế được ghi trong Project Execution Profile; tests phù hợp chạy; limitations không bị che.
+## Procedure
+1. **Identify the underlying requirement**: Determine what Docker was providing (database instance, message broker, or clean build environment).
+2. **Deploy lightweight alternatives**:
+   - Use SQLite or in-memory database drivers for unit and component tests.
+   - Connect to a shared local database instance using separate schemas or database names per worker.
+   - Employ in-memory mock stubs for external third-party services.
+3. **Adjust parallel concurrency**: If resource isolation cannot be proven on local hardware, reduce the number of concurrent workers and serialize task execution.

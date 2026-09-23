@@ -14,7 +14,7 @@ Branch/workspace:
 
 ## Objective
 
-Một outcome có thể kiểm chứng, không mô tả mơ hồ kiểu “improve module”.
+A concrete, measurable outcome. Avoid vague descriptions like "improve service."
 
 ## Source Requirements
 
@@ -42,35 +42,35 @@ forbidden_paths: []
 ## Resource Allocations
 
 ```text
-Migration Slot:
+Migration slot:
 Ports:
-DB objects:
+Database objects:
 Routes/events/queues:
-Env vars/feature flags:
+Environment variables / feature flags:
 Other exclusive resources:
 ```
 
 ## Expected Outputs
 
-Liệt kê theo tầng: database, backend, frontend/mobile, contracts, tests, docs, generated artifacts.
+List deliverables by layer: database migrations, backend services, frontend/mobile views, contracts, tests, documentation, and generated artifacts.
 
 ## Acceptance Criteria
 
-Mỗi criterion phải measurable và có evidence source/command dự kiến.
+Every criterion must be measurable with an expected evidence source or test command.
 
 ## Verification Commands
 
 ```text
-Target tests:
-Repo/global gate:
-Contract/schema checks:
-Special security/regression checks:
+Targeted tests:
+Repository global gate:
+Contract/schema validation:
+Security/regression checks:
 ```
 
 ## Stop Conditions
 
-Scope/resource expansion; spec conflict; security decision; destructive action; stale upstream contract; workspace/base mismatch.
+Scope or resource expansion required; specification conflict; security decision; destructive database modification; stale upstream contract; workspace baseline mismatch.
 
 ## Completion Contract
 
-Worker gửi changed files, HEAD SHA, expected-output check, commands + exit codes, resource usage, unresolved items và requests. Worker không self-accept.
+Worker submits changed files, HEAD commit SHA, deliverable checklist, test commands and exit codes, resource usage, unresolved items, and formal requests. Workers never self-accept.

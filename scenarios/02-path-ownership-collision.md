@@ -1,27 +1,27 @@
 # Scenario: Path Ownership Collision
 
 ## Trigger
-Hai WPs yêu cầu write vào cùng exclusive path/hotspot.
+Two active workers attempt to edit the same file path concurrently.
 
 ## Risk
-Overwrite, merge conflict, ownership ambiguity.
+Merge conflicts, overwritten work, or race conditions.
 
 ## Evidence
-Exact allowed paths; planned edits; repository hotspot list.
+Ownership Matrix showing overlapping write boundaries in active worktrees.
 
 ## Immediate Action
-Reject parallel plan; split hotspot thành Integration Request hoặc serialize/transfer ownership.
+Halt execution on the colliding package. Reassign path ownership or serialize execution.
 
 ## Forbidden Response
-Không bảo agents “cẩn thận đừng sửa cùng dòng” như cơ chế chính.
+Never advise workers to "resolve it manually later during merge."
 
 ## Recovery Procedure
-Recompile WP boundaries và workspaces.
+Reconstruct boundaries. Reassign the disputed path to one worker, mark it read-only for the other, and recompile task prompts.
 
 ## Exit Criteria
-Chỉ một active writer cho region; plan mới có audit boundary rõ.
+Disputed path is owned exclusively by one worker; dependent worker receives the frozen contract.
 
 ## Example Lead Response
 ```text
-Collision tại services/api/router.go: chuyển file thành INTEGRATION_ONLY và để workers chỉ xuất route modules.
+Halt WP-B. Path `services/api/router.go` belongs to WP-A. WP-B will receive this dependency via Integration Request.
 ```

@@ -1,27 +1,27 @@
-# Scenario: Resource / Migration Collision
+# Scenario: Resource Identifier Collision
 
 ## Trigger
-Hai WPs xin cùng migration number, port, route hoặc DB object.
+Two workers generate identical database migration sequence numbers, claim the same network port, or bind the same route namespace.
 
 ## Risk
-Runtime conflict, migration sequence break, semantic corruption.
+Migration failure upon deployment, runtime port binding collisions, or overlapping endpoint routes.
 
 ## Evidence
-Resource Allocation Registry; current migrations; active leases.
+Resource Registry showing duplicate sequence slots or overlapping namespaces.
 
 ## Immediate Action
-Block second allocation; giữ owner hợp lệ và cấp slot khác.
+Block integration for both branches until unique sequence slots are assigned.
 
 ## Forbidden Response
-Không tự lấy “next number” trên branch riêng.
+Never permit workers to guess the next number by inspecting local folder listings.
 
 ## Recovery Procedure
-Update resource registry, candidate references và re-audit candidate đã đổi.
+Assign explicit unique resource slots in the Resource Registry. The affected worker renames artifacts, updates tests, and commits the fix.
 
 ## Exit Criteria
-Không còn duplicate exclusive resource và ordering hợp lệ.
+Every branch claims distinct allocated identifiers; migration tests pass upgrade and downgrade cycles.
 
 ## Example Lead Response
 ```text
-Resource slot R2 đã thuộc WP-B; WP-INFRA không được tự claim R2 hoặc tạo shared identifier khác. Nếu project dùng DB, R2 có thể là migration slot; nếu không, dùng resource type thực tế.
+Collision on migration 000021. WP-A holds Slot R1 (000021). Reassigning WP-B to Slot R2 (000022). Update filenames and re-audit.
 ```

@@ -1,8 +1,8 @@
-﻿# Chương 3: Quản trị tài nguyên và chống xung đột
+# Chapter 3: Resource Governance, Boundaries, and Lock Allocation
 
-## 3.1 Permission Envelope cho mỗi Worker
+## 3.1 Permission Envelope for Workers
 
-Mỗi worker nhận ba nhóm path:
+Every coding worker receives three explicit path groups:
 
 ```yaml
 allowed_paths:
@@ -15,149 +15,93 @@ forbidden_paths:
   - .github/workflows/**
 ```
 
-- `allowed_paths`: write/delete/rename trong contract.
-- `readonly_paths`: đọc nhưng không sửa.
-- `forbidden_paths`: không chạm; nếu cần, tạo request.
+- `allowed_paths`: Write, delete, and rename permissions strictly within the assigned package contract.
+- `readonly_paths`: Read-only access for reference and type validation.
+- `forbidden_paths`: Protected files that must not be modified. If modifications become necessary, submit a formal change request.
 
-Rename/move tính là delete + create, nên cả source và destination đều phải hợp lệ.
+Renaming or moving a file constitutes a deletion followed by a creation; both the source and target paths must reside within `allowed_paths`.
 
 ## 3.2 Ownership modes
 
-Agent Orchestrator dùng các mode khái niệm sau:
+Agent Orchestrator defines explicit permission modes:
 
-- `EXCLUSIVE_WRITE`: một active writer.
-- `SHARED_READ`: nhiều reader.
-- `INTEGRATION_ONLY`: chỉ Integrator/change request đã duyệt.
-- `ALLOCATED_WRITE`: chỉ instance được cấp, ví dụ migration slot.
-- `APPEND_ONLY`: thêm theo rule, không rewrite lịch sử.
-- `GENERATED`: file được sinh, worker không edit trực tiếp.
+- `EXCLUSIVE_WRITE`: Single active writer on the designated path.
+- `SHARED_READ`: Concurrent read access across all workers.
+- `INTEGRATION_ONLY`: Modifications reserved exclusively for the Integrator upon approved change requests.
+- `ALLOCATED_WRITE`: Restricted write access limited to pre-assigned identifiers (such as dedicated migration sequence numbers).
+- `APPEND_ONLY`: Sequential append operations under strict formatting rules without rewriting existing history.
+- `GENERATED`: Automated build outputs; workers must not manually edit these files.
 
-Không cần runtime lock manager để áp dụng; Lead có thể quản lý bằng Ownership Matrix + ledger miễn allocation rõ và audit được.
+These controls do not require automated lock daemon software; the Lead enforces them through the Ownership Matrix and operational audit logs.
 
-## 3.3 Semantic Resources quan trọng hơn path khi cần
+## 3.3 Semantic Resources beyond directory paths
 
-Collision có thể xảy ra dù paths không overlap: hai migrations cùng table; hai services cùng port; hai modules cùng route; hai workers định nghĩa cùng env var khác nghĩa; hai consumers dùng cùng event name khác schema.
+Collisions frequently occur even when file paths do not overlap:
+- Two workers create migrations modifying the same database table.
+- Two services claim the same network port.
+- Two endpoints register overlapping URL route patterns.
+- Two workers assign conflicting semantics to the same environment variable.
+- Two consumers publish conflicting payload schemas to the same event topic.
 
-Resource Registry nên có:
+Maintain an explicit Resource Registry:
 
 ```text
 resource_id | type | owner_wp | mode | value/slot | status | notes
 ```
 
-## 3.4 Migration Slots
+## 3.4 Allocation of sequential identifiers
 
-Migration là ví dụ điển hình của `ALLOCATED_WRITE`. Lead cấp slot trước dispatch:
+Database migrations and sequence numbers represent classic `ALLOCATED_WRITE` resources. The Lead assigns sequence slots prior to dispatch:
 
 ```text
-R1 -> WP-A / Agent 1
-R2 -> WP-B / Agent 2
-R3 -> WP-C / Agent 3
-R4 -> WP-D / Agent 4
+Slot R1 -> WP-A / Worker 1
+Slot R2 -> WP-B / Worker 2
+Slot R3 -> WP-C / Worker 3
+Slot R4 -> WP-D / Worker 4
 ```
 
-Worker không được “lấy số tiếp theo” bằng cách tự nhìn directory, vì các branches song song có thể cùng chọn một số.
+Workers must never determine sequence numbers by scanning local directory listings, as parallel branches will inspect identical baselines and select conflicting numbers.
 
 ```text
+Worker boundary constraint:
 You own allocated resource slot R2 only.
-Do not allocate R1, R3, R4 or create an additional shared identifier.
-If another shared resource becomes necessary, stop and send RESOURCE_REQUEST.
+Do not assign R1, R3, R4 or generate additional shared identifiers.
+If additional shared resources become necessary, halt and file a RESOURCE_REQUEST.
 ```
 
-## 3.5 Port, env, route và queue allocation
+## 3.5 Network ports, environment variables, routes, and message queues
 
 ```text
-PORT-API-DEV      -> 8081 -> WP/API
-PORT-RUNNER-DEV   -> 8092 -> WP/RUNNER
-ENV-REVIEW-KEY    -> reserved by security decision, not reusable
-ROUTE-/review/*   -> contract owner WP-CONTRACT
-QUEUE-ai.jobs     -> event contract owner
+PORT-API-DEV      -> 8081 -> Assigned to WP/API
+PORT-RUNNER-DEV   -> 8092 -> Assigned to WP/RUNNER
+ENV-REVIEW-KEY    -> Reserved by architecture decision; immutable
+ROUTE-/review/*   -> Owned by WP-CONTRACT specification
+QUEUE-ai.jobs     -> Event schema owned by core messaging contract
 ```
 
-Secret không copy vào Resource Registry; chỉ record tên/owner/policy, value nằm trong secret manager hoặc environment được kiểm soát.
+Never store actual secret values in the Resource Registry. Record the secret identifier, owner, and access policy; values reside in secure secret managers or protected runtime environments.
 
-## 3.6 Integration Hotspots
+## 3.6 Managing shared integration hotspots
 
-Các file dễ bị mọi worker muốn sửa: root router, application bootstrap, central DI, `Taskfile.yml`, root package manifest, global schema registry, shared CI workflow.
+Certain centralized files require updates from multiple features: application entrypoints (`main.go`, `index.ts`), dependency injection containers, root router manifests, `Taskfile.yml`, central build manifests, and shared CI pipelines.
 
-Đặt chúng `INTEGRATION_ONLY` khi nhiều WPs song song. Worker gửi Integration Request:
+Designate these files as `INTEGRATION_ONLY` during parallel execution waves. Workers submit structured Integration Requests upon completing their domain work:
 
 ```text
-Request: register /review routes
+Request: Register /review endpoints
 Candidate artifact: <owned-domain-path>/<candidate-artifact>
-Desired hotspot: services/api/router.go
-Reason: accepted WP requires registration
-Verification: repository global tests + route contract test
+Target hotspot: services/api/router.go
+Rationale: Accepted package requires public route registration
+Verification: Full repository test suite + route contract tests
 ```
 
-Integrator áp dụng sau audit, giảm merge conflict và ownership rộng.
+The Integrator applies approved registrations sequentially during integration, eliminating merge conflicts and keeping worker write boundaries narrow.
 
-## 3.7 Kỹ thuật chặn đứng từ sớm
+## 3.7 Early boundary enforcement
 
-Khi agent xin sửa ngoài scope:
+When a worker requests edits outside its assigned envelope:
 
-1. Xác định file/resource có thực sự cần cho acceptance không.
-2. Kiểm ownership/DAG xem ai đang sở hữu.
-3. Tìm phương án trong scope.
-4. Nếu không có, chọn scope extension có ràng buộc, Integration Request, ownership transfer, resource allocation mới hoặc WP mới.
-5. Ghi quyết định.
-
-```text
-Không cấp quyền sửa migrations/** hoặc services/api/** cho WP-INFRA.
-Hai vùng đang thuộc các WP khác và Migration Slots đã được cấp.
-Giữ solution trong deploy/** và services/runner-worker/**.
-Nếu health-check bắt buộc cần API wiring, gửi Integration Request; không sửa hotspot trực tiếp.
-```
-
-Đây là pattern chung để tránh Infrastructure/Platform Worker thay đổi shared schema, root registration hoặc domain resources “tiện thể”.
-
-## 3.8 Scope extension có kiểm soát
-
-Không phải request nào cũng bị từ chối. Nếu một Worker cần sửa shared build/task configuration để expose deliverable, Lead chỉ mở đúng file/resource cần thiết, kèm invariant:
-
-```text
-Granted: <shared-build-or-task-config>
-Conditions:
-- preserve all existing commands/tasks
-- project quality gate must remain green
-- contract/spec validation must remain green when applicable
-- no unrelated refactor
-```
-
-Scope extension tốt phải nhỏ, explicit, reversible và có verification bổ sung.
-
-## 3.9 Security boundary
-
-Resource reuse có thể là lỗi security. Nếu agent hỏi dùng deletion HMAC key cho content review, Lead phải từ chối vì hai security domains khác nhau.
-
-```text
-Reuse secret across domains? -> reject by default
-Weaken fail-closed behavior?  -> escalate
-Broaden privilege?            -> prefer narrower design
-```
-
-## 3.10 Lease transfer và crash
-
-Resource thuộc WP, không nhất thiết thuộc process/agent:
-
-```text
-WP-B owns resource slot R2
-Agent-4 generation 2 crashes
-Agent-7 generation 3 resumes WP-B
-R2 remains WP-B's slot
-Agent-4 generation 2 returning later is stale
-```
-
-Không recycle migration identifier chỉ vì agent cũ biến mất.
-
-## 3.11 Boundary Audit
-
-```bash
-git diff --name-status <base>...HEAD
-git status --short
-```
-
-Rà changed path với allowed/readonly/forbidden. Sau đó kiểm semantic diff: routes, migration identifiers, DB objects, env vars, ports. Chỉ nhìn filename là chưa đủ.
-
-## 3.12 Nguyên tắc cuối chương
-
-Parallelism an toàn dựa trên **ownership explicit + resource allocation trước + isolation + audit sau**. Khi số agent tăng, Lead phải thu hẹp boundary và tách shared hotspots khỏi worker branches khi có thể.
+1. Validate whether the requested file or resource is truly required to satisfy acceptance criteria.
+2. Inspect the Ownership Matrix and DAG to identify the current owner.
+3. Guide the worker toward in-scope alternatives (such as dependency injection or interface abstraction).
+4. If an external change is unavoidable, stop execution and file a formal Decision Request or Scope Expansion Request.

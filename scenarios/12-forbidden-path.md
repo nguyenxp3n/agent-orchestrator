@@ -1,27 +1,27 @@
-# Scenario: Forbidden Path Write
+# Scenario: Worker Writes to Forbidden Path
 
 ## Trigger
-Worker sửa readonly/forbidden/integration-only file.
+Audit diff reveals that a worker created, modified, or deleted files outside its assigned `allowed_paths`.
 
 ## Risk
-Boundary breach, hidden coupling, collision.
+Overwriting shared configurations or introducing uncoordinated side effects.
 
 ## Evidence
-git diff name-status; WP permission envelope.
+`git diff <base>...<candidate> --name-status` shows paths outside assigned envelope.
 
 ## Immediate Action
-Reject audit and issue focused rework or approved transfer if truly required.
+Issue an immediate `REJECT/REWORK` disposition with a `SCOPE_VIOLATION` finding.
 
 ## Forbidden Response
-Không giữ change vì “nó làm tests pass”.
+Never forgive boundary violations because the out-of-scope code looks useful.
 
 ## Recovery Procedure
-Revert/move work to authorized owner; rerun tests and audit.
+Worker reverts out-of-scope modifications. If the modification was genuinely necessary, file an explicit Scope Expansion Request.
 
 ## Exit Criteria
-Candidate diff entirely authorized.
+Candidate diff strictly respects assigned path boundaries; all required tests pass.
 
 ## Example Lead Response
 ```text
-Worker edits .github/workflows despite backend-only WP: REJECT_REWORK.
+Audit rejected: SCOPE_VIOLATION. Worker modified services/api/router.go. Revert changes to router.go and file an Integration Request.
 ```

@@ -1,172 +1,176 @@
-﻿# AGENT-ORCHESTRATOR: Design Specification
+# AGENT-ORCHESTRATOR: Design Specification
 
-**Ngày:** 2026-09-23  
-**Trạng thái:** Được người dùng ủy quyền tự động duyệt toàn bộ các cổng thiết kế/thực thi  
-**Loại sản phẩm:** Bộ cẩm nang Markdown + operational toolkit, không phải software runtime  
-**Đối tượng:** AI Lead Architect / kỹ sư điều phối 5–10+ coding agents trên cùng dự án phần mềm
+**Date:** 2026-09-23  
+**Status:** User-authorized autonomous execution across design and governance gates  
+**Product Type:** Modular Markdown field manual and operational toolkit, not a software runtime  
+**Target Audience:** AI Lead Architects and engineering leads coordinating 5 to 10+ coding agents on shared codebases  
 
-## 1. Mục tiêu
+## 1. Objective
 
-Xây dựng một framework phương pháp luận có thể dùng với Claude, GPT, Gemini, Antigravity, Cursor, Windsurf và các coding agents khác; có thể áp dụng cho Web Fullstack, Backend/Microservices, Mobile, Distributed Systems và CLI. Framework phải cho phép một AI Lead Architect đọc dự án, bóc tách Work Package, dựng DAG, cấp ownership và resource locks, tạo workspace cô lập, điều phối song song, xử lý Decision Request, audit độc lập và tích hợp tuần tự có bằng chứng.
+Build a model-agnostic, project-agnostic orchestration framework compatible with Claude, GPT, Gemini, Antigravity, Cursor, Windsurf, and other agentic coding harnesses. The framework applies across Web Fullstack, Backend/Microservices, Mobile, Distributed Systems, and CLI projects. It gives an AI Lead Architect the operating model to ingest project requirements, extract decoupled Work Packages, construct execution DAGs, allocate ownership and semantic resource locks, provision isolated workspaces, drive parallel agent execution, arbitrate Decision Requests, conduct independent forensic audits, and execute evidence-backed sequential integration.
 
-## 2. Định vị
+## 2. Positioning
 
-Agent Orchestrator không phải là orchestration engine Python, SDK, scheduler daemon hay control-plane executable. Agent Orchestrator là **field manual + operational toolkit** được AI Lead Architect thực thi. Các primitive như DAG, state machine, lock, recovery, audit attestation và integration queue được giữ ở mức giao thức, mẫu biểu, checklist và playbook; không triển khai thành runtime 400KB.
+Agent Orchestrator is not an executable Python engine, an SDK, a scheduler daemon, or a control-plane service. Agent Orchestrator is an operational field manual and methodology executed directly by the AI Lead Architect. Primitives such as DAGs, state machines, resource locks, recovery procedures, forensic audit attestations, and integration queues are delivered as protocols, contracts, templates, checklists, and incident playbooks rather than a monolithic runtime executable.
 
-## 3. Nguồn dung hợp
+## 3. Source Synthesis
 
-1. V1 `agent-orchestrator-framework`: Zero Hallucination, Zero Trust, checklist exhaustive, resource boundary enforcement, strict completion gate, Forensic Audit và các field incidents đã được anonymize/generalize.
-2. V2 `orchestrator-framework-v2.0.0`: Project Intelligence, Work Package protocol, DAG, Ownership Matrix, semantic resources, locks/leases, state machine, generation fencing, recovery bundle, 15 conformance scenarios, independent audit, dependency-aware integration, cross-WP gate.
-3. `ai-project-finalization-workflow-v2.0.0`: source-of-truth theo subject, state names là assurance levels, stop conditions, audit closure discipline.
-4. Runtime prototype cũ: prompt roles cho Orchestrator/Worker/Auditor/Integrator và các bài học về việc không biến `WORKER_COMPLETE` thành `ACCEPTED`.
-5. Field experience 6-agent (anonymized): parallel branches, resource-slot allocation, scope rejection, missing required-layer detection, external CI verification và sequential merge.
+1. V1 `agent-orchestrator-framework`: Zero Hallucination, Zero Trust, exhaustive checklist review, strict resource boundaries, atomic completion gates, multi-layer forensic audits, and anonymized field incident logs.
+2. V2 `orchestrator-framework-v2.0.0`: Project Intelligence, formal Work Package contracts, dependency DAGs, Ownership Matrices, semantic resource locking and leases, explicit state machines, assignment generation fencing, recovery bundles, 15 conformance scenarios, independent audits, dependency-aware integration queues, and cross-WP acceptance gates.
+3. `ai-project-finalization-workflow-v2.0.0`: Subject-based source-of-truth hierarchy, state labels reflecting true assurance levels, explicit stop conditions, and strict audit closure discipline.
+4. Legacy runtime prototypes: Role definitions for Orchestrator, Worker, Auditor, and Integrator, combined with the core operational rule that `WORKER_DONE != ACCEPTED`.
+5. Field experience from anonymized multi-agent projects: Parallel branch isolation, semantic resource-slot reservation, out-of-scope boundary enforcement, shared-configuration extension control, security-domain boundaries, missing required-layer detection, independent CI verification, and sequential merge pipelines.
 
-## 4. Bốn invariant bất biến
+## 4. The Five Core Invariants
 
 ### 4.1 Zero Hallucination
-Không có bằng chứng thì trạng thái là `UNKNOWN`. Không bịa file, command output, CI status, commit, branch, resource allocation hay completion.
+Unverified claims default to `UNKNOWN`. Never fabricate file paths, terminal command output, CI pipeline statuses, git commits, branches, resource allocations, or completion milestones.
 
 ### 4.2 Zero Trust
-Worker report là claim. Lead hoặc Auditor phải xác minh độc lập mọi trạng thái mutable trước khi dùng chúng làm truth.
+A worker completion report is an unverified claim. The Lead Architect or an Independent Auditor must independently inspect all mutable artifacts before treating claims as facts.
 
 ### 4.3 Mandatory Verification
-Mọi chuyển trạng thái quan trọng cần evidence thực tế: filesystem/Git diff/exit code/test log/CI/API hoặc artifact có thể kiểm chứng.
+Every major lifecycle state transition requires verifiable evidence: filesystem artifacts, git diffs, exit codes, test execution logs, CI outputs, API responses, or inspectable logs.
 
 ### 4.4 Atomic Completion
-WP chỉ `ACCEPTED` khi 100% acceptance criteria bắt buộc đạt. Backend pass nhưng frontend thiếu vẫn là `INCOMPLETE`.
+A Work Package reaches `ACCEPTED` only when 100% of its mandatory acceptance criteria are satisfied. A passing backend test suite with an incomplete frontend integration remains `INCOMPLETE`.
 
-### 4.5 Project-Agnostic
-Framework không được phụ thuộc một project/domain/case study cụ thể. Project input (`docs/`, `spec/`, `plan/`, `workflow/` hoặc nguồn tương đương) quyết định project model, ownership, resources, commands và verification. DB/migration/frontend/Docker chỉ xuất hiện khi project thật có chúng.
+### 4.5 Project-Agnostic Design
+The framework remains decoupled from specific business domains, platforms, or case studies. Project source materials (`docs/`, `spec/`, `plan/`, `workflow/`, or repository truth) determine the project model, ownership boundaries, semantic resources, build commands, and verification criteria. Databases, migrations, frontends, or Docker containers appear only when the target project requires them.
 
 ## 5. Adaptive Strictness
 
-Framework cứng ở outcome/invariant, mềm ở mechanism. Isolation là bắt buộc nhưng có thể dùng Git worktree, clone riêng, container hoặc remote workspace. Quality gate là bắt buộc nhưng command phụ thuộc toolchain: `task qa`, `make test`, `pnpm test`, `cargo test`, `go test ./...`, `pytest`, `dotnet test`… Không ép Docker nếu dự án không dùng Docker.
+The framework enforces outcomes and invariants strictly while keeping operational mechanisms adaptable. Workspace isolation is non-negotiable, but teams can implement it using git worktrees, dedicated directory clones, Docker containers, or isolated cloud workspaces. Quality gates are non-negotiable, but commands conform to the project toolchain: `task qa`, `make test`, `pnpm test`, `cargo test`, `go test ./...`, `pytest`, `dotnet test`, or custom scripts. Never mandate Docker when a project does not use it.
 
 ## 6. Separation of Duties
 
-- Lead Orchestrator: project intake, source-of-truth, decomposition, DAG, ownership, resource allocation, assignment, DR arbitration, recovery, acceptance, integration order.
-- Worker: chỉ implementation trong WP và permission envelope.
-- Auditor/Reviewer: độc lập kiểm chứng; không sửa code trong cùng audit task.
-- Integrator: tích hợp candidate đã accepted; chỉ sửa hotspot theo Integration Request đã duyệt.
+- Lead Orchestrator: Project intake, source-of-truth arbitration, task decomposition, DAG construction, ownership boundaries, resource allocation, task dispatch, Decision Request arbitration, failure recovery, final acceptance, and integration sequencing.
+- Worker: Implementation strictly within assigned Work Package boundaries and resource permissions.
+- Auditor/Reviewer: Independent verification against raw evidence; forbidden from modifying code during an audit task.
+- Integrator: Sequential integration of accepted candidate branches; authorized to resolve shared hotspots solely through approved Integration Requests.
 
-Lead không tự động viết code thay Worker. Nếu cần thay đổi implementation, phải giao lại Worker, tạo corrective WP hoặc thay Worker. Điều này giữ ownership, auditability và separation of duties.
+The Lead Architect does not write implementation code directly. When code changes are required, the Lead reassigns the task to a Worker, creates a targeted corrective Work Package, or replaces the Worker. This rule protects clear ownership, auditability, and separation of duties.
 
 ## 7. Canonical Lifecycle
 
-`PROJECT INPUT → INTAKE → PROJECT MODEL → WP DECOMPOSITION → DAG → OWNERSHIP/RESOURCE ALLOCATION → ISOLATED WORKSPACES → PARALLEL EXECUTION → WORKER_DONE → FORENSIC AUDIT → ACCEPTED/REWORK → INTEGRATION QUEUE → SEQUENTIAL MERGE → CROSS-WP/GLOBAL QA → MAIN/RELEASE`.
+`PROJECT INPUT -> INTAKE -> PROJECT MODEL -> WP DECOMPOSITION -> DAG -> OWNERSHIP/RESOURCE ALLOCATION -> ISOLATED WORKSPACES -> PARALLEL EXECUTION -> WORKER_DONE -> FORENSIC AUDIT -> ACCEPTED/REWORK -> INTEGRATION QUEUE -> SEQUENTIAL MERGE -> CROSS-WP/GLOBAL QA -> MAIN/RELEASE`.
 
-DAG quyết định integration order, không phải thời điểm worker báo xong.
+The dependency DAG governs the merge order, not the chronological completion time of individual workers.
 
 ## 8. State Model
 
-WP states tối thiểu: `DRAFT`, `READY`, `ASSIGNED`, `RUNNING`, `BLOCKED`, `AWAITING_DECISION`, `READY_FOR_AUDIT`, `REWORK`, `ACCEPTED`, `INTEGRATING`, `INTEGRATED`, `FAILED`, `CANCELLED`.
+Work Package states: `DRAFT`, `READY`, `ASSIGNED`, `RUNNING`, `BLOCKED`, `AWAITING_DECISION`, `READY_FOR_AUDIT`, `REWORK`, `ACCEPTED`, `INTEGRATING`, `INTEGRATED`, `FAILED`, `CANCELLED`.
 
-Agent runtime state là khái niệm riêng: `READY`, `RUNNING`, `SUSPECTED_STALLED`, `PAUSED`, `FAILED`, `REASSIGNED`, `ABANDONED`. Worker crash không làm WP tự động thất bại.
+Agent runtime states operate independently: `READY`, `RUNNING`, `SUSPECTED_STALLED`, `PAUSED`, `FAILED`, `REASSIGNED`, `ABANDONED`. A worker failure or crash does not mark the Work Package as failed.
 
 ## 9. Resource Model
 
-Phải quản lý cả path và semantic resources. Ownership modes tham khảo: `EXCLUSIVE_WRITE`, `SHARED_READ`, `INTEGRATION_ONLY`, `ALLOCATED_WRITE`, `APPEND_ONLY`, `GENERATED`.
+The framework governs both filesystem paths and semantic resources. Ownership modes include: `EXCLUSIVE_WRITE`, `SHARED_READ`, `INTEGRATION_ONLY`, `ALLOCATED_WRITE`, `APPEND_ONLY`, and `GENERATED`.
 
-Semantic resources gồm: migration numbers, DB tables/columns, API routes, event names, queue names, env vars, ports, CLI commands, feature flags, schema versions, public interfaces.
+Semantic resources include: migration sequence numbers, database tables and columns, API endpoints, message event names, message queue names, environment variables, network ports, CLI commands, feature flags, schema versions, and shared public interfaces.
 
-Lead phân Migration/port slot trước khi dispatch; worker không tự cấp phát.
+The Lead allocates migration and port slots prior to dispatch. Workers never allocate shared semantic slots autonomously.
 
 ## 10. Work Package Contract
 
-Mỗi WP tối thiểu có: ID, mục tiêu, source requirements, dependencies, allowed/readonly/forbidden paths, owned resources, expected files/artifacts, frozen contracts, acceptance criteria, commands, stop conditions, DR procedure, completion report contract, integration requests.
+Every Work Package specification contains: unique ID, explicit objective, source requirements, upstream dependencies, allowed/readonly/forbidden path boundaries, assigned semantic resources, expected deliverables and artifacts, frozen interfaces, acceptance criteria, verification commands, stop conditions, Decision Request escalation procedures, completion report contracts, and integration requirements.
 
-Worker không self-expand scope. Nhu cầu ngoài envelope phải trở thành Decision Request, Resource Request, Ownership Transfer, Integration Request hoặc WP mới.
+Workers cannot expand their own scope. Requirements outside the assigned envelope require a formal Decision Request, Resource Request, Ownership Transfer, Integration Request, or a separate follow-on Work Package.
 
-## 11. Source-of-Truth
+## 11. Source of Truth
 
-Không dùng một precedence ladder phẳng cho mọi thứ. Authority phải theo subject: product behavior, API wire shape, DB physical schema, security invariant, deployment, implementation order có thể thuộc các nguồn khác nhau. Nguồn ngang quyền mâu thuẫn thì giữ `UNRESOLVED`; không trộn thành giả thuyết.
+Never rely on a single flat precedence hierarchy across all project domains. Authority derives from subject domains: product behavior, wire protocol shapes, physical database schemas, security invariants, deployment topology, and implementation sequence each have designated authoritative sources. When equivalent peer sources conflict, mark the discrepancy `UNRESOLVED` and escalate rather than guessing intent.
 
 ## 12. Forensic Audit
 
-Audit bắt buộc ít nhất bảy lớp: Git/identity, workspace hygiene, scope/diff, expected outputs, unit/target tests, repo-wide quality gate, acceptance barem + security/contracts/regression. Missing evidence = `UNKNOWN` và block acceptance. Audit bind với exact candidate SHA/snapshot; thay candidate sau audit thì audit cũ mất hiệu lực.
+Every forensic audit executes at least seven distinct verification layers: git identity, workspace hygiene, scope and diff conformance, expected output files, targeted unit/integration test results, full repository quality gates, and acceptance criteria coverage alongside security and regression checks. Missing evidence defaults to `UNKNOWN` and blocks acceptance. An audit binds immutably to a specific candidate commit SHA. Modifying the branch invalidates previous audit attestations immediately.
 
 ## 13. Sequential Integration
 
-Chỉ candidate `ACCEPTED` mới vào integration queue. Merge theo dependency DAG, mỗi bước chạy pre-merge checks và post-merge global checks. Shared integration hotspots chỉ do Integrator xử lý. Main drift hoặc stale audited SHA làm batch phải revalidate.
+Only `ACCEPTED` candidate branches enter the integration queue. Merges proceed in topological dependency order. Each step executes pre-merge compatibility checks followed by post-merge global test runs. Integrators resolve shared integration hotspots directly. If the target branch drifts or the audited SHA expires, the batch requires re-validation.
 
 ## 14. Recovery
 
-Khi agent crash: freeze workspace, capture status/diff/latest safe commit/leases/DRs/warnings, phân loại clean recoverable/dirty recoverable/corrupted/unsafe-unknown, tạo Recovery Bundle rồi tăng assignment generation. Zombie agent từ generation cũ bị reject.
+When an agent stalls or crashes: freeze the workspace, collect runtime status, examine git diffs, identify the latest clean commit, verify held leases, log pending Decision Requests, classify the failure (clean recoverable, dirty recoverable, corrupted, or unsafe-unknown), build a Recovery Bundle, and increment the assignment generation counter. Late messages or commits from previous assignment generations are rejected automatically.
 
-## 15. Adaptive Playbook
+## 15. Adaptive Playbooks
 
-Phải có playbook cho: no Docker/low RAM, agent timeout/crash, spec conflict, scope expansion, migration collision, Git conflict, CI failure, main drift, stale audit, cross-WP failure và Safe Mode.
+The operational toolkit includes targeted playbooks for: environments without Docker or low RAM, agent timeout or process crashes, specification conflicts, scope expansion attempts, migration sequence collisions, git merge conflicts, CI pipeline failures, main branch drift, stale audit attestations, cross-WP integration failures, and safe mode recovery.
 
-## 16. 15 Scenario bắt buộc
+## 16. The 15 Mandatory Conformance Scenarios
 
-1. Safe parallel work
+1. Safe parallel execution
 2. Path ownership collision
-3. Resource/migration collision
-4. Agent crash/recovery
-5. Zombie agent after reassignment
-6. Contract change during downstream work
+3. Resource and migration sequence collision
+4. Agent crash and recovery
+5. Zombie agent rejection after reassignment
+6. Contract modification during downstream execution
 7. Integration hotspot conflict
-8. Main drift
-9. Harness/tool outage
-10. Incomplete/contradictory docs
-11. Stale audit SHA
-12. Forbidden-path write
-13. Independently passing WPs fail together
-14. Duplicate/stale message
-15. Corrupt orchestration state → Safe Mode
+8. Target branch drift
+9. Toolchain and test harness outages
+10. Incomplete or contradictory specifications
+11. Stale audit commit SHA
+12. Unauthorized write to forbidden paths
+13. Individually passing Work Packages failing when combined
+14. Duplicate or stale agent messages
+15. Corrupted orchestration state triggering Safe Mode
 
-Mỗi scenario phải có Trigger, Risk, Evidence, Immediate Action, Forbidden Response, Recovery, Exit Criteria, Example Lead Response.
+Every scenario document specifies: Trigger, Risk, Observable Evidence, Immediate Action, Prohibited Responses, Recovery Procedure, Exit Criteria, and Example Lead Responses.
 
-## 17. Package Structure
+## 17. Repository Structure
 
 ```text
 AGENT-ORCHESTRATOR/
   README.md
   START-HERE.md
+  CHANGELOG.md
+  LICENSE.md
   handbook/01..07
-  prompts/6 role prompts
-  templates/9 operational templates
+  prompts/7 canonical prompts
+  prompt-engineering/01..07
+  templates/11 operational templates
   checklists/5 checklists
-  playbooks/8+ incident playbooks
+  playbooks/10 incident playbooks
   scenarios/15 scenario files
   case-studies/project-neutral-six-agent-case.md
-  examples/5 project examples
-  quick-reference/4 references
+  examples/6 project examples
+  quick-reference/5 reference documents
   meta/BUILD-SPEC.md
   meta/IMPLEMENTATION-PLAN.md
   meta/FINAL-VERIFICATION-REPORT.md
+  meta/SOURCE-SYNTHESIS-MAP.md
   SHA256SUMS.txt
 ```
 
 ## 18. Quality Requirements
 
-- Tiếng Việt chuyên môn cao, rõ và trực tiếp.
-- Mỗi khái niệm có ví dụ hoặc lệnh cụ thể khi phù hợp.
-- Prompt phải copy-paste được, dùng placeholder rõ ràng.
-- Template phải sử dụng được thủ công hoặc cho AI điền.
-- Không có các placeholder markers bị cấm hoặc section rỗng.
-- Không claim `production ready` hoặc `100%` nếu verification chưa đủ.
-- README phải chỉ đường 15 phút để bắt đầu.
-- Chương 7 và scenarios phải nhấn mạnh ứng biến theo toolchain/project thực tế.
+- Professional, direct, human-written technical English.
+- Concrete examples and shell commands accompanying abstract concepts.
+- Copy-paste ready prompts with clear, explicit placeholder markers.
+- Functional operational templates ready for manual completion or LLM-driven generation.
+- Zero placeholder markers or empty sections in production documents.
+- No unsupported claims of production readiness without complete verification evidence.
+- A concise 15-minute quickstart workflow inside `README.md` and `START-HERE.md`.
+- Explicit guidance in Handbook Chapter 7 and scenario playbooks for adapting to project-specific toolchains.
 
 ## 19. Non-Goals
 
-- Không xây Python/Node/Rust runtime.
-- Không tạo database state store.
-- Không viết scheduler executable.
-- Không phụ thuộc một model/provider cụ thể.
-- Không bắt buộc Docker/Kubernetes.
-- Không hứa zero defects; chỉ enforce evidence-before-acceptance.
+- No standalone Python, Node.js, or Rust runtime engine.
+- No database-backed state store daemon.
+- No executable scheduling background service.
+- No dependency on vendor-locked model APIs.
+- No mandatory Docker or Kubernetes runtime requirements.
+- No guarantee of zero defects without enforcing evidence-before-acceptance.
 
 ## 20. Acceptance Criteria
 
-Artifact đạt yêu cầu khi:
-1. Có đủ cấu trúc và file bắt buộc ở mục 17.
-2. 7 handbook chapter bao phủ đầy đủ brief người dùng.
-3. 6 prompt có role, constraints, inputs, output contract, stop/escalation rules.
-4. Templates và checklists usable, không stub.
-5. 15 scenarios đủ format chuẩn.
-6. Project-neutral six-agent case study ghi lại ít nhất bốn bài học thực tế: missing required output layer, allocated resource slots, controlled scope expansion/security và external CI verification.
-7. Có ví dụ 6-agent project-neutral và 10-agent project; ví dụ tổng thể phải chứng minh khả năng áp dụng cho Web, Microservices, Mobile, Distributed Systems và CLI.
-8. Có validator chạy được để kiểm: file presence, forbidden placeholders, minimum sections, internal links cơ bản và checksum/archive integrity.
-9. Final verification report ghi exact commands, exit codes và known limitations.
+The framework artifact meets acceptance criteria when:
+1. All directory structures and required files in Section 17 exist on disk.
+2. The 7 handbook chapters fully cover all core orchestration domains.
+3. Canonical prompts define role, context, constraints, inputs, output contracts, and escalation rules.
+4. Templates and checklists are functional and complete without stubs.
+5. All 15 operational scenarios follow the standard specification format.
+6. The project-neutral six-agent case study documents key operational lessons: missing deliverable layers, allocated resource slots, controlled scope expansion, and independent CI verification.
+7. Architectural examples cover 6-agent and 10-agent configurations across Web, Microservices, Mobile, Distributed Systems, and CLI domains.
+8. Deterministic validation verifies file presence, heading consistency, prohibited placeholders, relative links, and checksum integrity.
+9. The final verification report documents exact commands, execution outputs, and residual operational risks.

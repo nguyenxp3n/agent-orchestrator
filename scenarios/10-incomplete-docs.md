@@ -1,27 +1,27 @@
-# Scenario: Incomplete / Contradictory Docs
+# Scenario: Incomplete or Contradictory Specifications
 
 ## Trigger
-Project thiếu docs hoặc docs cùng authority mâu thuẫn.
+A worker discovers that required edge-case behavior is absent from specifications or directly contradicted by existing code.
 
 ## Risk
-Lead invents architecture/toolchain.
+Arbitrary guessing by workers leading to architectural inconsistency.
 
 ## Evidence
-Repository facts; manifests; CI; docs; git history.
+Worker inquiry highlighting missing specifications or conflicting documents.
 
 ## Immediate Action
-Record FACT/INFERENCE/UNKNOWN; narrow scope; DR protected conflicts.
+Instruct the worker to pause the affected function while continuing orthogonal components.
 
 ## Forbidden Response
-Không biến low-confidence inference thành broad ownership.
+Never encourage the worker to "use your best judgment" on architectural boundaries.
 
 ## Recovery Procedure
-Create minimal execution profile and refresh when authority resolved.
+The Lead consults authoritative documentation, issues a technical ruling via Decision Request, and updates task parameters.
 
 ## Exit Criteria
-Dispatch only work whose critical boundaries are known.
+Specification updated; worker implements code conforming to the formal ruling.
 
 ## Example Lead Response
 ```text
-README cũ nói npm, repo hiện pnpm lockfile + CI pnpm: build command authority lấy evidence hiện hành.
+Ambiguity confirmed regarding null payload handling. Ruling: Return HTTP 400 with structured error envelope. Spec updated.
 ```

@@ -1,26 +1,16 @@
-# Checklist: Pre-Merge / Integration Gate
+# Pre-Merge Checklist
 
-```text
-[ ] WP status ACCEPTED
-[ ] Audit disposition ACCEPT
-[ ] Candidate SHA equals audited SHA
-[ ] Dependencies already integrated or satisfied
-[ ] Current main SHA compared with audit baseline
-[ ] Main drift impact resolved
-[ ] Migration/resource ordering valid
-[ ] Integration Requests approved
-[ ] Dedicated integration workspace clean
-[ ] Merge policy confirmed
-[ ] No ambiguous semantic conflict
-```
+The Integrator verifies this checklist before merging an accepted candidate branch into main.
 
-Sau merge:
+## 1. Candidate identity and audit currency
+- [ ] Candidate commit SHA matches the exact SHA approved in the signed audit report.
+- [ ] Audit disposition is verified as `ACCEPT`.
+- [ ] Main branch has not drifted since the audit was performed. If main has advanced, candidate must be rebased and re-audited.
 
-```text
-[ ] Global build/test/quality gate exit 0 or documented non-regression baseline
-[ ] Contract/schema/event validation pass
-[ ] Critical E2E/smoke pass when required
-[ ] Resulting integration SHA recorded
-[ ] Cloud CI run belongs to resulting SHA when required
-[ ] Queue stops immediately on blocking failure
-```
+## 2. Dependency ordering
+- [ ] Upstream prerequisites in the DAG are already merged into the target branch.
+- [ ] Merge sequence strictly follows topological order in the DAG.
+
+## 3. Shared hotspot preparation
+- [ ] Any required edits to shared routers or bootstrap files are documented in an approved Integration Request.
+- [ ] Approved integration patches adhere strictly to frozen interface specifications.

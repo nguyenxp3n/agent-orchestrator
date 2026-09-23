@@ -1,21 +1,10 @@
-# Playbook: Specification Conflict
+# Playbook: Specification Contradiction
 
 ## Trigger
-Hai nguồn authoritative hoặc spec và repository evidence mâu thuẫn.
+Authoritative documentation contradicts existing code, or two specification documents make conflicting claims.
 
 ## Procedure
-Xác định subject: business, API, DB, security, build, deployment. Áp authority theo subject. Nếu nguồn ngang quyền và không có supersession evidence, tạo Decision Request.
-
-```text
-FACT A + source
-FACT B + source
-SUBJECT AUTHORITY
-IMPACT
-OPTIONS
-```
-
-## Forbidden Response
-Không chọn “code luôn đúng” hoặc “spec luôn đúng” như luật chung; không blend hai semantics thành giải pháp thứ ba.
-
-## Exit Criteria
-Decision có authority, downstream context được refresh và affected candidate được reverified.
+1. **Pause affected package**: Halt work on the conflicting component; continue orthogonal tasks.
+2. **Determine domain authority**: Identify which source holds governing authority for the specific domain (e.g., OpenAPI schemas govern API wire contracts; migrations govern database schemas).
+3. **Escalate equal-authority conflicts**: If sources of equal precedence conflict without documented precedence, construct a formal Decision Request presenting trade-offs to the human project authority.
+4. **Recompile task prompt**: Once resolved, update authoritative documentation, record the decision in the Decision Ledger, and recompile the affected worker prompt.

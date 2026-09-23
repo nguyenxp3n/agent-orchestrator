@@ -1,18 +1,16 @@
-# Playbook: Git Conflict
+# Playbook: Git Merge Conflict Resolution
 
 ## Trigger
-Sequential merge phát sinh conflict.
+Git reports merge conflicts during candidate branch integration.
 
-## Classify
-- Textual conflict, semantics giống nhau → Integrator resolve.
-- Approved integration hotspot → theo Integration Request.
-- Public contract semantics khác → Decision Request.
-- Hai WPs cùng sửa exclusive area → planning violation, không che bằng merge tay.
-
-```bash
-git status
-git diff --name-only --diff-filter=U
-```
-
-## Exit Criteria
-Conflict resolution traceable tới source of truth, global QA pass, resulting SHA recorded.
+## Procedure
+1. **Inspect conflicting hunks**:
+   ```bash
+   git diff --ours -- <file>
+   git diff --theirs -- <file>
+   ```
+2. **Determine conflict type**:
+   - Textual overlap with identical technical intent: The Integrator resolves the conflict directly.
+   - Shared integration hotspot with approved Integration Request: The Integrator applies the approved registration patch.
+   - Divergent contract semantics: Halt integration immediately and submit a Decision Request.
+   - Two workers modified the same exclusive path: Planning boundary defect. Roll back and re-align package definitions.

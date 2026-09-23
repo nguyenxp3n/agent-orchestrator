@@ -1,40 +1,40 @@
 # Quick Reference: Decision Tree
 
-## Có thể dispatch WP?
+## Can a Work Package be dispatched?
 
 ```text
-Hard deps satisfied? no -> WAIT
-Contract frozen if required? no -> WAIT/DR
-Path collision? yes -> REPLAN
-Resource collision? yes -> REALLOCATE
-Workspace isolated? no -> PROVISION/FALLBACK
-Critical unknown? yes -> DR
-else -> DISPATCH
+Hard dependencies satisfied?      No  -> WAIT
+Contracts frozen if required?     No  -> WAIT / DECISION_REQUEST
+Path boundary collision?          Yes -> REPLAN OWNERSHIP
+Resource identifier collision?    Yes -> REALLOCATE SLOTS
+Workspace isolated?               No  -> PROVISION WORKTREE / CLONE
+Critical unknowns remain?         Yes -> DECISION_REQUEST
+All criteria satisfied?           Yes -> DISPATCH WORKER
 ```
 
-## Worker cần sửa ngoài scope?
+## Worker requests changes outside scope?
 
 ```text
-Can solve in scope? yes -> clarify
-Shared hotspot? yes -> Integration Request
-Owned by another WP? yes -> reject/transfer/new WP
-Security/public contract/destructive? yes -> DR/human authority
-Else bounded extension -> record + extra verification
+Can be solved within scope?       Yes -> Provide in-scope guidance
+Target is a shared hotspot?       Yes -> Submit Integration Request
+Path owned by another worker?     Yes -> Reject / Transfer / New WP
+Implicates security or contracts? Yes -> Escalate via Decision Request
+Bounded minor extension?          Yes -> Grant explicit path + extra audit
 ```
 
-## Worker reports DONE?
+## Worker reports completion?
 
 ```text
-Completion Report -> exact SHA -> Forensic Audit
-missing output/violation/test fail -> REWORK
-all required evidence pass -> ACCEPTED
+Inspect Completion Report -> Exact candidate commit SHA -> Forensic Audit
+Missing deliverables or tests fail -> REWORK
+All required evidence verified    -> ACCEPTED
 ```
 
-## Merge conflict?
+## Resolving merge conflicts?
 
 ```text
-Text-only + same semantics -> Integrator resolves
-Frozen contract decides -> follow contract
-Semantics ambiguous -> DR
-Ownership violation -> re-plan/corrective work
+Textual overlap with identical semantics -> Integrator resolves directly
+Semantics governed by frozen contract    -> Conform strictly to contract
+Semantic ambiguity exists                -> Submit Decision Request
+Planning boundary violation              -> Halt and reconstruct packages
 ```
